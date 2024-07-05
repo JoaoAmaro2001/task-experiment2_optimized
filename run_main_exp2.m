@@ -1,6 +1,6 @@
-clear all
-close all
-subID = input('subID:', 's');
+% clear all
+% close all
+% subID = input('subID:', 's');
 settings_main; % Load all the settings from the file
 HideCursor;
 
@@ -80,7 +80,6 @@ while trial_ <= n
         case 2
             drawCross(window_1, W, H);
             tFixation = Screen('Flip', window_1);
-            [ret, outlet] = MatNICMarkerSendLSL(1, outlet); % Cross event code to NIC
             FixTime(trial_) = tFixation - start_exp;
             disp('FixTime:')
             disp(FixTime)
@@ -96,7 +95,7 @@ while trial_ <= n
             trial_index = randomizedTrials.(columnName);
             video_name{trial_} = videoList{randomizedTrials.(trial_)};
             disp(video_name)
-            file = ['C:\Users\SpikeUrban\Documents\Exp5\task\task5\Scripts\Videos_session_1\',video_name{trial_}];
+            file = [videoFolder video_name{trial_}];
            
             try
                 [movie, duration, fps, width, height, count, aspectRatio] = Screen('OpenMovie', window_1, file);
@@ -443,7 +442,7 @@ end
 % -------------------------------------------------------------------------
 %                          Results file
 % -------------------------------------------------------------------------
-name_file = [results_path '/resultfile_' num2str(subID) '.xlsx'];
+name_file = [results num2str(subID) '.xlsx'];
 
 M = [FixTime', VideoTime', Ego_Time', Allo_Time', ...
     Valence_Time', Arousal_Time', Blank_Time', ego_coordinate_x', ego_coordinate_y', ...
