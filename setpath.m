@@ -5,6 +5,20 @@ if isempty(user)
 end
 
 switch user
+    case 'Bruno Miranda'          % Tower computer
+    try
+    root        = 'Z:\Exp_2_optimized-video_rating'; % LAN
+    cd(root); 
+    cd(cdir);
+    catch
+    root        = 'D:\Exp_2_optimized-video_rating'; % Local
+    end
+    scripts     = 'C:\github\JoaoAmaro2001\task-experiment2_optimized'; % specify path to scripts; 
+    sourcedata  = fullfile(root,'sourcedata'); 
+    bidsroot    = fullfile(root,'bids'); 
+    results     = fullfile(root,'results');
+    derivatives = fullfile(root,'derivatives'); 
+
     case 'NGR_FMUL'          % VR-accelerated computer
     try
     root        = 'Z:\Exp_2_optimized-video_rating'; % LAN
@@ -51,3 +65,4 @@ switch user
 end
 
 addpath(genpath(scripts))
+addpath('C:\toolbox\Psychtoolbox')
