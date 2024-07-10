@@ -2,9 +2,12 @@ help NetStation
 
 host = '10.10.10.42'; % check in cmd >>> ipconfig /all
 port = 8;
-[status, errormsg] = NetStation('Connect', host, address)
+[status, errormsg] = NetStation('Connect', host, '55513')
 
-[status, errMsg] = NetStation('Connect', '10.10.10.42');
+[status, errMsg] = NetStation('Connect', '192.168.89.134', '55513');
+
+ntpserver = '10.10.10.51';
+[status, error] = NetStation( 'GetNTPSynchronize', ntpserver )
 
 status = NetStation('Synchronize')
 
