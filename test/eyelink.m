@@ -2,6 +2,8 @@ help Eyelink
 Eyelink Initialize?
 
 ipadress = '100.1.1.2'; % check in cmd >>> ipconfig /all
+ipadress = '10.10.10.32'; % check in cmd >>> ipconfig /all
+
 status = Eyelink('SetAddress', ipadress); % Check connection
 
 % Eye dir

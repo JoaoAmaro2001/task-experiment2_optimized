@@ -1,8 +1,9 @@
 help NetStation
 
+% Set IP to '10.10.10.32'
 host = '10.10.10.42'; % check in cmd >>> ipconfig /all
 port = 8;
-[status, errormsg] = NetStation('Connect', host, '55513')
+[status, errormsg] = NetStation('Connect', host)
 
 [status, errMsg] = NetStation('Connect', '192.168.89.134', '55513');
 

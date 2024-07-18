@@ -1,4 +1,4 @@
-function [position, RT, answer] = slideScale(screenPointer, question, rect, anchors, varargin)
+function [position, RT, answer] = slideScaleAs(screenPointer, question, rect, anchors, varargin)
 %SLIDESCALE This funtion draws a slide scale on a PSYCHTOOLOX 3 screen and returns the
 % position of the slider spaced between -100 and 100 as well as the rection time and if an answer was given.
 %
@@ -94,7 +94,7 @@ lineLength    = 10;
 width         = 3;
 scalaLength   = 0.9;
 scalaPosition = 0.8;
-sliderColor   = [255 0 0];
+sliderColor   = [0 0 0];
 scaleColor    = [0 0 0];
 device        = 'mouse';
 aborttime     = Inf;

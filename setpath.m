@@ -11,7 +11,7 @@ switch user
     cd(root); 
     cd(cdir);
     catch
-    root        = 'D:\Exp_2_optimized-video_rating'; % Local
+    root        = 'C:\Exp_2_optimized-video_rating'; % Local
     end
     scripts     = 'C:\github\JoaoAmaro2001\task-experiment2_optimized'; % specify path to scripts; 
     sourcedata  = fullfile(root,'sourcedata'); 
@@ -40,6 +40,8 @@ switch user
     cd(cdir);
     catch
     root        = 'Z:\Exp_2_optimized-video_rating'; % Local
+    cd(root); 
+    cd(cdir);
     end
     scripts     = 'C:\Users\joaop\git\JoaoAmaro2001\WorkRepo'; % specify path to scripts; 
     sourcedata  = fullfile(root,'sourcedata'); 

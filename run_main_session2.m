@@ -1,7 +1,7 @@
-% clear all
-% close all
-% subID = input('subID:', 's');
-settings_main; % Load all the settings from the file
+clear all
+close all
+subID = input('subID:', 's');
+settings_main_session2; % Load all the settings from the file
 HideCursor;
 
 % -------------------------------------------------------------------------
@@ -9,11 +9,13 @@ HideCursor;
 % -------------------------------------------------------------------------
 % Number of trials/videos based on available videos
 n                 = length(videoList);
+% n                = 2;
 trial_            = 1;
 t                 = trial_;
 
 % Initialize time variables
-FixTime           = zeros(1,n); 
+FixTime           = zeros(1,n);
+FrameTime         = zeros(1,n);
 VideoTime         = zeros(1,n);
 Ego_Time          = zeros(1,n);
 Allo_Time         = zeros(1,n);
@@ -21,7 +23,7 @@ Valence_Time      = zeros(1,n);
 Arousal_Time      = zeros(1,n);
 Blank_Time        = zeros(1,n); 
 
-video_name        = cell(1,n);
+video_name        = cell(1,n)
 
 % Reaction times and choices for valence and arousal
 rt_ego            = zeros(1,n);
@@ -48,7 +50,7 @@ while trial_ <= n
     switch state
 
 % -------------------------------------------------------------------------
-%                       Countdown for empathic sync
+%                  Countdown for empathic sync
 % -------------------------------------------------------------------------
         case 0
             countdown_from = 10; % Start countdown from 10
@@ -67,7 +69,7 @@ while trial_ <= n
 % -------------------------------------------------------------------------
         case 1
             Screen('TextSize', window_1, 50);
-            DrawFormattedText(window_1, ['The experiment will start shortly, ' ...
+            DrawFormattedText(window_1, ['The experiment will start soon, ' ...
                 'please focus on the black cross'], 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             WaitSecs(5);
@@ -79,53 +81,64 @@ while trial_ <= n
         case 2
             drawCross(window_1, W, H);
             tFixation = Screen('Flip', window_1);
+            [ret, outlet] = MatNICMarkerSendLSL(1, outlet); % Cross event code to NIC
             FixTime(trial_) = tFixation - start_exp;
             disp('FixTime:')
             disp(FixTime)
             WaitSecs(3);
             state = 3;  % Proceed to next state to play video
 
+
 % -------------------------------------------------------------------------
 %                             Video
 % -------------------------------------------------------------------------
         case 3
-            % Load and play video
+            % Get the size of the screen to define video position
+            [screenWidth, screenHeight] = Screen('WindowSize', window_1);
+
+            % Define new dimensions for the video, 1.5x1.5 times smaller
+            newWidth = screenWidth / 1.5;
+            newHeight = screenHeight / 1.5;
+
+            % Calculate the position to center the smaller video on the screen
+            dst_rect = [...
+                (screenWidth - newWidth) / 2, ...
+                (screenHeight - newHeight) / 2, ...
+                (screenWidth + newWidth) / 2, ...
+                (screenHeight + newHeight) / 2];
+            
+            % important to select the correct sequence of videos
             columnName = sprintf('Var%d', trial_);
             trial_index = randomizedTrials.(columnName);
             video_name{trial_} = videoList{randomizedTrials.(trial_)};
             disp(video_name)
-            file = [videoFolder video_name{trial_}];
-           
+            file = ['C:\Users\SpikeUrban\Documents\Exp5\task\task5\Scripts\Videos_session_2\',video_name{trial_}];
+
             try
-                [movie, duration, fps, width, height, count, aspectRatio] = Screen('OpenMovie', window_1, file);
-                Screen('PlayMovie', movie, 1);  % Play movie at normal speed
-                videoStartTime = Screen('Flip', window_1);  % This will update the display and return the timestamp
-                [ret, outlet] = MatNICMarkerSendLSL(2, outlet); % Video event code to NIC
-                VideoTime(trial_) = videoStartTime - start_exp;  % Store the elapsed time since the experiment started
-                disp('VideoTime:')
-                disp(VideoTime)
+                % Open the movie, start playback paused
+                [movie, duration, fps, width, height, count, aspectRatio] = Screen('OpenMovie', window_1, file, 0, inf, 2);
+                Screen('SetMovieTimeIndex', movie, 0);  %Ensure the movie starts at the very beginning
+
+                % Get the first frame and display it
+                tex = Screen('GetMovieImage', window_1, movie, 1, 0);
+                if tex > 0  % If a valid texture was returned
+                    Screen('DrawTexture', window_1, tex, [], dst_rect);  % Draw the texture on the screen
+                    Screen('Flip', window_1);  % Update the screen to show the first frame
+                    WaitSecs(1.5);  % Hold the first frame for 1.5 seconds
+                    Screen('Close', tex);  % Close the texture
+                end
+
+                % Continue playing movie from the first frame
+                Screen('PlayMovie', movie, 1, 0);  % Start playback at normal speed from the current position
+                [ret, outlet] = MatNICMarkerSendLSL(2, outlet); % Nav Ego event code to NIC
+
+                % Further video playback code handling remains unchanged as per your original setup
             catch ME
                 disp(['Failed to open movie file: ', file]);
                 rethrow(ME);
             end
 
-                % Get the size of the screen
-                [screenWidth, screenHeight] = Screen('WindowSize', window_1);
-    
-                % Define new dimensions for the video, four times smaller
-                newWidth = screenWidth / 1.5;
-                newHeight = screenHeight / 1.5;
-    
-                % Calculate the position to center the smaller video on the screen
-                dst_rect = [...
-                    (screenWidth - newWidth) / 2, ...
-                    (screenHeight - newHeight) / 2, ...
-                    (screenWidth + newWidth) / 2, ...
-                    (screenHeight + newHeight) / 2];
-    
-            Screen('FillRect', window_1, backgroundColor);
             state = 4;
-            %dst_rect = [0 0 W H];
 
             case 4
                 % Play and display the movie
@@ -441,7 +454,7 @@ end
 % -------------------------------------------------------------------------
 %                          Results file
 % -------------------------------------------------------------------------
-name_file = [results num2str(subID) '.xlsx'];
+name_file = [results_path '/resultfile_session2_' num2str(subID) '.xlsx'];
 
 M = [FixTime', VideoTime', Ego_Time', Allo_Time', ...
     Valence_Time', Arousal_Time', Blank_Time', ego_coordinate_x', ego_coordinate_y', ...
@@ -458,6 +471,7 @@ writetable(T,name_file);
 
 sca;
 [ret, outlet] = MatNICMarkerSendLSL(8, outlet); % End event code to NIC
+[ret] = MatNICAbortProtocol('Experiment_5', socket); % stop eeg recording
 
 
 
