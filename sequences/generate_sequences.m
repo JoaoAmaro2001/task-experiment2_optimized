@@ -1,8 +1,8 @@
 setpath;
 
 % Directories
-allstim_path     = fullfile(sourcedata, 'supp', 'allStimuli');
-stim_path        = fullfile(sourcedata, 'supp', 'stimuli');
+allstim_path   = fullfile(sourcedata, 'supp', 'allStimuli');
+stim_path      = fullfile(sourcedata, 'supp', 'stimuli');
 
 % Settings
 moveAvi        = false;

@@ -1,6 +1,6 @@
 % When the computer has a parallel port, use this function
-% If Psychtoolbox wanted to be use at the same time
-% NetStation('Connect', '10.10.10.42')
+% If Psychtoolbox needs to be used at the same time then:
+% NetStation('Connect', '10.10.10.42') -> IPV4 10.10.10.XX and same subnet as MAC
 % NetStation('Synchronize')
 
 function parallel_port(data_out)
