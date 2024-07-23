@@ -1,5 +1,5 @@
 % Cleanup function used throughout the eyelink script
-function cleanup_el
+function cleanupEl
     try
         Screen('CloseAll'); % Close window if it is open
     catch

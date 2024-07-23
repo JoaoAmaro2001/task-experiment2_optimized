@@ -1,4 +1,4 @@
-function eyelinkExperiment2(screenNumber)
+function [window, rect, el] = eyelinkExperiment2(screenNumber, edfFile, data)
 % A simple EyeLink integration demo that records eye movements passively 
 % while an image is presented on the screen. Each trial ends when the
 % space bar or a button is pressed.
@@ -20,6 +20,8 @@ InitializePsychSound();
 % Use default screenNumber if none specified
 if (nargin < 1)
     screenNumber = [];
+elseif (nargin < 2)
+    edfFile = [];
 end
 
 try
@@ -39,9 +41,7 @@ try
     end
        
     % Check if data.text.elFileName exists and is not empty
-    if exist('data', 'var') && isfield(data, 'text') && isfield(data.text, 'elFileName') && ~isempty(data.text.elFileName)
-        edfFile = data.text.elFileName; % Use existing file name
-    else
+    if isempty(edfFile) % If no file name is provided
         % Open dialog box for EyeLink Data file name entry. File name up to 8 characters
         prompt = {'Enter EDF file name (up to 8 characters)'};
         dlg_title = 'Create EDF file';
@@ -109,7 +109,7 @@ try
     if isempty(screenNumber)
         screenNumber = max(Screen('Screens')); % Use default screen if none specified
     end
-    window = Screen('OpenWindow', screenNumber, [128 128 128]); % Open graphics window
+    [window, rect] = Screen('Openwindow',screenNumber,data.format.background_color,[],[],2);
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
     [width, height] = Screen('WindowSize', window);
@@ -131,8 +131,8 @@ try
         
     % Use an image file instead of the default calibration bull's eye targets. 
     % Commenting out the following two lines will use default targets:
-    el.calTargetType = 'image';
-    el.calImageTargetFilename = [pwd '/' 'fixTarget.jpg'];
+    % el.calTargetType = 'image';
+    % el.calImageTargetFilename = [pwd filesep 'fixTarget.jpg'];
     
     % Set calibration beeps (0 = sound off, 1 = sound on)
     el.targetbeep = 1;  % sound a beep when a target is presented
@@ -151,7 +151,7 @@ try
     % Allow a supported EyeLink Host PC button box to accept calibration or drift-check/correction targets via button 5
     Eyelink('Command', 'button_function 5 "accept_target_fixation"');
     % Hide mouse cursor
-    HideCursor(screenNumber);
+    if dummymode==0; HideCursor(screenNumber); end
     % Start listening for keyboard input. Suppress keypresses to Matlab windows.
     ListenChar(-1);
     Eyelink('Command', 'clear_screen 0'); % Clear Host PC display from any previus drawing

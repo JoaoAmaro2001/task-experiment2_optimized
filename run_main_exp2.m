@@ -58,7 +58,7 @@ eventSamples    = zeros(1, numEvents); % Sample number at which event occurs, op
 % -------------------------------------------------------------------------
 
 % Wait fot user input to start the experiment
-input('Press Enter to start the task.');
+% input('Press Enter to start the task.');
 
 % Start with state 99
 state     = 99;   
@@ -169,11 +169,16 @@ while trial_ <= n
             DrawFormattedText(window_1, ['The experiment will start soon, ' ...
                 'please focus on the black cross'], 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
+            % ------------------------------------------- EEG
             parallel_port(1);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
             eventTypes{event_}  = 'DI1';  % Store the event type
             eventValues(event_) = 1;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
+            % ------------------------------------------- EL
+            Eyelink('Message', 'TRIALID %d', trial_);
+            Eyelink('Message', '!V CLEAR %d %d %d', el.backgroundcolour(1), el.backgroundcolour(2), el.backgroundcolour(3));
+            Eyelink('Command', 'record_status_message "TRIAL %d/%d"', trial_, n);
             % -------------------------------------------
             WaitSecs(5);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
@@ -494,8 +499,8 @@ while trial_ <= n
             disp('rt_arousal:')
             disp(rt_arousal)
             % -------------------------------------------
-            % Wait for one and a half seconds
-            WaitSecs(1.5);
+            % Wait for one second
+            WaitSecs(1);
             % -------------------------------------------
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
@@ -505,15 +510,25 @@ while trial_ <= n
     end
 end
 
-% -------------------------------------------------
+% ------------------------------------------------- EEG
 parallel_port(10);   % Send end event to NetStation
 eventOnsets(event_) = GetSecs - start_exp;
 eventTypes{event_}  = 'DI10';  % Store the event type
 eventValues(event_) = 10;  % Store the event value
 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
 eventDurations(event_) = GetSecs - eventOnsets(event_);
-% -------------------------------------------------
-cleanup_el;  % Clean up the experiment + eye tracker
+% ------------------------------------------------- Eyelink
+% Put tracker in idle/offline mode before closing file. Eyelink('SetOfflineMode') is recommended.
+% However if Eyelink('Command', 'set_idle_mode') is used, allow 50ms before closing the file as shown in the commented code:
+% Eyelink('Command', 'set_idle_mode'); % Put tracker in idle/offline mode
+WaitSecs(0.05); % Allow some time for transition  
+Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode
+Eyelink('Command', 'clear_screen 0'); % Clear Host PC backdrop graphics at the end of the experiment
+WaitSecs(0.5); % Allow some time before closing and transferring file
+Eyelink('CloseFile'); % Close EDF file on Host PC
+% Transfer a copy of the EDF file to Display PC
+transferFile; % See transferFile function
+cleanupEl;  % Clean up the experiment + eye tracker
 
 % -------------------------------------------------------------------------
 %                          Convert Log File into TSV/XLSX
