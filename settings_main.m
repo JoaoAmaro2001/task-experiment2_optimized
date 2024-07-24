@@ -1,8 +1,124 @@
-% -------------------------------------------------------------------------
-%                             Directories
-% ------------------------------------------------------------------------- 
-
+% Init pc-specific paths and variables
 setpath;
+
+% Directories
+docs_path     = fullfile(scripts,'docs');
+allstim_path  = fullfile(sourcedata, 'supp', 'allStimuli');
+stim_path     = fullfile(sourcedata, 'supp', 'stimuli');
+logs_path     = fullfile(sourcedata, 'supp', 'logfiles');
+event_path    = fullfile(sourcedata, 'supp', 'events');
+data_path     = fullfile(sourcedata, 'data');
+
+%  SCREEN SETUP
+output_screen = 2; % 1 for primary, 2 for secondary, ...
+screens = Screen('Screens');
+screenNumber = max(screens);
+
+if screenNumber > 0 % find out if there is more than one screen
+    dual = get(0,'MonitorPositions');
+    resolution = [0,0,dual(output_screen,3),dual(output_screen,4)];
+elseif screenNumber == 0 % if not, get the normal screen's resolution
+    resolution = get(0,'ScreenSize');
+end
+data.format.resolx = resolution(3);
+data.format.resoly = resolution(4);
+
+% cleanup unused variables
+clear output_screen screens resolution dual
+
+
+%% PARAMETERS - SETUP & INITIALISATION
+AssertOpenGL; % gives warning if running in PC with non-OpenGL based PTB
+
+% Formatting options
+data.format.fontSize = 40;
+data.format.fontSizeFixation = 120;
+data.format.font = 'Arial';
+data.format.background_color = [255 255 255]; % grey 150!
+% initialise system for key query - changed 'UnifyKeyNames' to 'KeyNames' due to
+% the keyboard usage
+KbName('UnifyKeyNames')
+keyDELETE = KbName('delete'); 
+keySPACE  = KbName('space');
+keyESCAPE = KbName('escape');
+keyZ = KbName('z'); % 1
+keyX = KbName('x'); % 2
+keyC = KbName('c'); % 3
+keyV = KbName('v'); % 4
+keyB = KbName('b'); % 5
+keyN = KbName('n'); % 6
+keyM = KbName('m'); % 7
+
+% instructions definition
+data.text.taskname          = 'videorating';
+data.text.getready_en       = 'The experiment will start shortly... Keep your eyes fixed on the cross';
+data.text.getready_pt       = 'A experiência começará em breve... Mantenha o olhar fixo na cruz';
+data.text.starting_en       = 'Starting in';
+data.text.starting_pt       = 'Começa em';
+data.text.baselineClosed_en = 'Baseline with eyes closed will start shortly';
+data.text.baselineClosed_pt = 'O periodo de relaxamento com olhos fechados começará em breve';
+data.text.baselineOpen_en   = 'Baseline with eyes closed will start shortly';
+data.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos fechados começará em breve';
+
+% get rating image & size
+imX = 1920; imY = 1080; % image resolution 1920x1080
+data.image.image_size = ...
+    [(data.format.resolx - imX)/2, (data.format.resoly - imY)/2,...
+    imX, imY];
+clear imX imY; % cleanup unused variables
+
+% user input - participant information
+% get user input for usage or not of eyelink
+prompt={'Introduza o ID do participante',...
+    'Linguagem da tarefa','Indique o número da sessão (run)'};
+dlg_title='Input';
+% default: no ID, eyetracker in dummy mode, sequence 1, pupilometry
+data.input = inputdlg(prompt,dlg_title,1,{'...','pt','1'});
+% get time of experiment
+dateOfExp = datetime('now');
+
+% Task Language
+if strcmpi(data.input{2},'pt')
+    lanSuf = '_pt';
+elseif strcmpi(data.input{2},'en')
+    lanSuf = '_en';
+end
+
+% Filenames
+data.text.elFileName        = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_eye'];
+data.text.logFileName       = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_log'];
+data.text.eegFileName       = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_eeg'];
+data.text.eventFileName     = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_event'];
+
+% select sequence to use
+if str2double(data.input{3}) == 1
+    generate_sequences;  % Generate new stimuli sequence
+    sequence = load('sequences\sequence1.mat');
+elseif str2double(data.input{3}) == 2
+    sequence = load('sequences\sequence2.mat');
+else
+    warning('Selected sequence does not exist');
+end
+
+% save information from chosen sequence in the 'data' structure
+data.sequences.trialOrder = sequence.sequenceNumbers; 
+data.sequences.files      = sequence.sequenceFiles;
+
+% get subject id folder to store result files
+subjRootFolderName = ['sub-',data.input{1}];
+if ~isfolder(fullfile(data_path, subjRootFolderName))
+    mkdir(fullfile(data_path, subjRootFolderName));
+end
+
+% cleanup unused variables
+clear prompt dlg_title num_lines ppid scriptName ii
+
+% Settings for export options
+exportXlsx = true;
+exportTsv  = true;
+
+% Initialise EEG -> Open NetStationAcquisition and start recording
+input('Press Enter if NetStation Acquisition is running and recording.');
 
 % -------------------------------------------------------------------------
 %                             SETUP SCREEN
@@ -14,100 +130,15 @@ Screen('Preference', 'SkipSyncTests', 1);   % Is this safe?
 Screen('Preference','VisualDebugLevel', 0); % Minimum amount of diagnostic output
 
 % -------------------------------------------------------------------------
-%                             1 SCREEN
+%                       Initialise Eyelink +  Screen
 % -------------------------------------------------------------------------
-whichScreenMin = min(Screen('Screens')); % Get the screen numbers
-[screenWidth, screenHeight] = Screen('WindowSize', whichScreenMin); % Get the screen size
-[window_1, rect] = Screen('OpenWindow', whichScreenMin, backgroundColor, [0 0 screenWidth/2, screenHeight/2]);
-
-% -------------------------------------------------------------------------
-%                             Continue
-% -------------------------------------------------------------------------
-slack = Screen('GetFlipInterval', window_1)/2; %The flip interval is half of the monitor refresh rate; why is it here?
-W=rect(RectRight);                            % screen width
-H=rect(RectBottom);                           % screen height
-Screen('FillRect',window_1, backgroundColor);  % Fills the screen with the background color
-Screen('Flip', window_1);                      % Updates the screen (flip the offscreen buffer to the screen)
+edfFileName = [data.input{1} '_' data.input{3}]; % cannot have more than 8 chars
+[window_1, rect, el] = eyelinkExperiment2(screenNumber, edfFileName, data);
 
 % -------------------------------------------------------------------------
-%                         Time trial settings
+%                             Get Screen Center
 % -------------------------------------------------------------------------
-breakAfterTrials = 100000;
-timeBetweenTrials = 1; % How long to pause in between trials (if 0, the experiment will wait for
-                       % the subject to press a key before every trial)
-
-% -------------------------------------------------------------------------
-%                    Stimuli lists and results files
-% -------------------------------------------------------------------------
-% videos of different trajectories
-videoFolder = [scripts '\Videos_session_1'];
-disp(['Video folder: ' videoFolder]);
-
-% Check if the directory exists
-if isfolder(videoFolder)
-    disp('Directory exists.');
-
-    % List all files in the directory
-    videoFiles = dir(videoFolder);
-    disp('Contents of videoFolder:');
-    disp({videoFiles(:).name});
-
-    % Filter out the .mp4 files
-    videoFormat = 'mp4';
-    videoList = dir(fullfile(videoFolder, ['*.' videoFormat]));
-    videoList = {videoList(:).name};
-    disp('Filtered videoList:');
-    disp(videoList);
-
-    nTrials = length(videoList); %1
-else
-    disp('Directory does not exist.');
-end
-
-% Navigation questions
-imageFolder = 'images';
-imageFormat = 'png';
-imgList = dir(fullfile(scripts, imageFolder, ['*.' imageFormat]));
-imgList = {imgList(:).name};
-disp(imgList);
-
-% score images
-imageFolder_score = 'score_images';
-imageFormat = 'JPG';
-imgList2 = dir(fullfile(scripts, imageFolder_score, ['*.' imageFormat]));
-imgList2 = {imgList2(:).name};
-disp(imgList2);
-
-min_secs = 0.5;
-max_secs = 1.5; 
-fixationDuration = min_secs + (max_secs - min_secs) * rand(1, nTrials);
-
-% -------------------------------------------------------------------------
-%                            Randomize trials
-% -------------------------------------------------------------------------
-
-
-
-% -------------------------------------------------------------------------
-%                                Start
-% -------------------------------------------------------------------------
-load('randomizedTrials_all.mat')
-
-% Ensure subID is valid
-while true
-    subID = input('subID:', 's');
-    if length(subID) >= 2
-        break;
-    else
-        disp('subID must be at least 10 characters long. Please re-enter.');
-    end
-end
-
-disp(['Current subID: ', subID]);  % This will show the current value of subID
-disp(['Length of subID: ', num2str(length(subID))]);  % This will display the length of subID
-
-codeID=subID(1:2);
-randomizedTrials = randomizedTrials_all(str2num(codeID),:);
-
-terminateKey = KbName('return');      % Key code for escape key
-start_exp = GetSecs;
+W=rect(RectRight);                             % screen width
+H=rect(RectBottom);                            % screen height
+centerX = W / 2;                               % x center
+centerY = H / 2;                               % y center

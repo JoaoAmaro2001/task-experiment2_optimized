@@ -6,7 +6,10 @@
 function parallel_port(data_out)
 
 ioObj = io64;
-status = io64(ioObj);
+[~, status] = evalc('io64(ioObj)'); % use evalc to hide output
+if status ~= 0
+    error('io64 installation failed');
+end
 address = hex2dec('BFF8');
 %-------------------------------------------------
 io64(ioObj,address,data_out); % send a signal

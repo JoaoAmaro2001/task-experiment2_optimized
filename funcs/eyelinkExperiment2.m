@@ -11,6 +11,8 @@ function [window, rect, el] = eyelinkExperiment2(screenNumber, edfFile, data)
 % screenNumber = max(Screen('Screens'));
 % will be used.
 
+% persistent el
+
 % Bring the Command Window to the front if it is already open
 if ~IsOctave; commandwindow; end
 
@@ -110,6 +112,9 @@ try
         screenNumber = max(Screen('Screens')); % Use default screen if none specified
     end
     [window, rect] = Screen('Openwindow',screenNumber,data.format.background_color,[],[],2);
+    Screen('TextSize', window,data.format.fontSize);
+    Screen('TextFont', window,data.format.font);
+    Screen('TextStyle', window, 1);
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
     [width, height] = Screen('WindowSize', window);
@@ -117,6 +122,8 @@ try
     
     %% STEP 4: SET CALIBRATION SCREEN COLOURS/SOUNDS; PROVIDE WINDOW SIZE TO EYELINK HOST & DATAVIEWER; SET CALIBRATION PARAMETERS; CALIBRATE
     
+    % Set the blending mode for drawing operations on the specified window
+    Screen('BlendFunction',window,'GL_SRC_ALPHA','GL_ONE_MINUS_SRC_ALPHA');
     % Provide EyeLink with some defaults, which are returned in the structure "el".
     el = EyelinkInitDefaults(window);
     % set calibration/validation/drift-check(or drift-correct) size as well as background and target colors. 
@@ -150,8 +157,8 @@ try
     Eyelink('Command', 'calibration_type = HV9'); % horizontal-vertical 9-points
     % Allow a supported EyeLink Host PC button box to accept calibration or drift-check/correction targets via button 5
     Eyelink('Command', 'button_function 5 "accept_target_fixation"');
-    % Hide mouse cursor
-    if dummymode==0; HideCursor(screenNumber); end
+    % % Hide mouse cursor
+    % if dummymode==0; HideCursor(screenNumber); end
     % Start listening for keyboard input. Suppress keypresses to Matlab windows.
     ListenChar(-1);
     Eyelink('Command', 'clear_screen 0'); % Clear Host PC display from any previus drawing

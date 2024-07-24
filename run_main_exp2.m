@@ -1,7 +1,7 @@
 % Main script for running Emotional Cities' experiment 2
 clear; close all; clc; % Clean workspace
-settings_test;         % Load all the settings from the file
-% HideCursor;
+settings_main;         % Load all the settings from the file
+HideCursor;
 
 % -------------------------------------------------------------------------
 %                       Set variables fot While Loop
@@ -14,15 +14,6 @@ event_            = 1;
 % -------------------------------------------------------------------------
 %                       Set variables for Log File
 % -------------------------------------------------------------------------
-
-% Initialize time variables
-FixTime           = zeros(1,n);
-FrameTime         = zeros(1,n);
-VideoTime         = zeros(1,n);
-Valence_Time      = zeros(1,n);
-Arousal_Time      = zeros(1,n);
-Blank_Time        = zeros(1,n); 
-Video_name        = cell(1,n);
 
 % Reaction times and choices for valence and arousal
 rt_valence        = zeros(1,n); 
@@ -64,6 +55,7 @@ eventSamples    = zeros(1, numEvents); % Sample number at which event occurs, op
 state     = 99;   
 
 while trial_ <= n
+
     switch state
 
 % -------------------------------------------------------------------------
@@ -82,11 +74,14 @@ while trial_ <= n
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
                 Screen('TextFont', window_1, 'Arial');
-                message = sprintf('Starting in %d', i);
+                message = sprintf(strcat(eval(strcat('data.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
                 WaitSecs(1);
             end
+            % -------------------------------------------
+            Eyelink('Message','Empatica Synch');
+            % Eyelink('command','record_status_message "Instructions Screen"');
             % -------------------------------------------
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
@@ -99,20 +94,19 @@ while trial_ <= n
             % You need to give clear instructions for when the subject
             % needs to open their eyes again
             Screen('TextSize', window_1, 50);
-            DrawFormattedText(window_1, ['The experiment will start soon, ' ...
-                'please focus on the black cross'], 'center', 'center', textColor);
+            DrawFormattedText(window_1, eval(strcat('data.text.baselineClosed', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             WaitSecs(5);
             countdown_from = 5; % Start countdown from 10
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
                 Screen('TextFont', window_1, 'Arial');
-                message = sprintf('Starting in %d', i);
+                message = sprintf(strcat( eval(strcat('data.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
                 WaitSecs(1);
             end
-            
+            % -------------------------------------------
             % Draw Cross
             drawCross(window_1, W, H);
             tFixation = Screen('Flip', window_1);
@@ -123,6 +117,9 @@ while trial_ <= n
             eventValues(event_) = 98;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
             % -------------------------------------------
+            Eyelink('Message','Eyes Closed');
+            % Eyelink('command','record_status_message "Eyes Closed"')
+            % -------------------------------------------
             WaitSecs(30);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
@@ -132,21 +129,20 @@ while trial_ <= n
 %                            Eyes open Baseline
 % -------------------------------------------------------------------------
         case 97
-            
             Screen('TextSize', window_1, 50);
-            DrawFormattedText(window_1, ['The experiment will start soon, ' ...
-                'please focus on the black cross'], 'center', 'center', textColor);
+            DrawFormattedText(window_1, eval(strcat('data.text.baselineOpen', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             WaitSecs(5);
             countdown_from = 5; % Start countdown from 10
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
                 Screen('TextFont', window_1, 'Arial');
-                message = sprintf('Starting in %d', i);
+                message = sprintf(strcat( eval(strcat('data.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
                 WaitSecs(1);
             end
+            % -------------------------------------------
             % Draw Cross
             drawCross(window_1, W, H);
             tFixation = Screen('Flip', window_1);
@@ -155,6 +151,9 @@ while trial_ <= n
             eventTypes{event_}  = 'DI97';  % Store the event type
             eventValues(event_) = 97;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
+            % -------------------------------------------
+            Eyelink('Message','Eyes Open');
+            % Eyelink('command','record_status_message "Eyes Open"')
             % -------------------------------------------
             WaitSecs(30);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
@@ -166,8 +165,7 @@ while trial_ <= n
 % -------------------------------------------------------------------------
         case 1
             Screen('TextSize', window_1, 50);
-            DrawFormattedText(window_1, ['The experiment will start soon, ' ...
-                'please focus on the black cross'], 'center', 'center', textColor);
+            DrawFormattedText(window_1, eval(strcat('data.text.getready', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             % ------------------------------------------- EEG
             parallel_port(1);   % Send to NetStation
@@ -189,37 +187,42 @@ while trial_ <= n
 %                             Cross
 % -------------------------------------------------------------------------
         case 2
+            Eyelink('command','draw_cross %d %d',...
+            data.format.resolx/2,data.format.resoly/2);
+            Eyelink('Message','Fixation Cross');
+            % -----------------------------------------
             drawCross(window_1, W, H);
             tFixation = Screen('Flip', window_1);
             parallel_port(2);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
             eventTypes{event_}  = 'DI2';  % Store the event type
             eventValues(event_) = 2;  % Store the event value
-            eventSamples        = round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
+            eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
             % -------------------------------------------
             WaitSecs(1);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
             state = 3;  % Proceed to next state to play video
-
+            % -------------------------------------------EL start
+            Eyelink('command','set_idle_mode');
+            Eyelink('StartRecording');
+            WaitSecs(0.1);
 % -------------------------------------------------------------------------
 %                             Video
 % -------------------------------------------------------------------------
         case 3
-            % Get the size of the screen to define video position
-            [screenWidth, screenHeight] = Screen('WindowSize', window_1);
-
+            % Eyelink setup
+            elCheckRecording; % Check if everything is fine
+            Eyelink('Message', 'STIM_ONSET');
             % Define new dimensions for the video, 1.5x1.5 times smaller
-            newWidth = screenWidth / 1.5;
-            newHeight = screenHeight / 1.5;
-
+            newWidth  = W / 1.5;
+            newHeight = H / 1.5;
             % Calculate the position to center the smaller video on the screen
             dst_rect = [...
-                (screenWidth - newWidth) / 2, ...
-                (screenHeight - newHeight) / 2, ...
-                (screenWidth + newWidth) / 2, ...
-                (screenHeight + newHeight) / 2];
-            
+                (W - newWidth) / 2, ...
+                (H - newHeight) / 2, ...
+                (W + newWidth) / 2, ...
+                (H + newHeight) / 2];
             % important to select the correct sequence of videos
             videoFile = data.sequences.files{trial_};
             file      = fullfile(stim_path, videoFile);
@@ -268,7 +271,6 @@ while trial_ <= n
                 tex = 0;
                 while ~KbCheck && tex~=-1  % Continue until keyboard press or movie ends
                     [tex, pts] = Screen('GetMovieImage', window_1, movie, 1);
-
                     if tex > 0  % If a valid texture was returned
                         % Draw the texture on the screen
                         Screen('DrawTexture', window_1, tex, [], dst_rect);
@@ -279,14 +281,16 @@ while trial_ <= n
                     end
                 end
 
-        % Stop playback:
-        Screen('PlayMovie', movie, 0);
+        Screen('PlayMovie', movie, 0); % Stop playback
         % -------------------------------------------
         eventDurations(event_) = GetSecs - eventOnsets(event_);
         event_ = event_ + 1;
         % -------------------------------------------
-        % Close movie:
         Screen('CloseMovie', movie);
+        % -------------------------------------------
+        WaitSecs(0.1);
+        Eyelink('StopRecording');
+        % -------------------------------------------
         state = 5;  
 
 % -------------------------------------------------------------------------
@@ -294,22 +298,18 @@ while trial_ <= n
 % -------------------------------------------------------------------------
         case 5 
             % Set the mouse cursor to the center of the screen
+            ShowCursor;
             SetMouse(centerX, centerY, window_1);
             file_valence = fullfile(allstim_path,'Score_Valence.png');
-
             % Load the image from the file
             imageArray_valence = imread(file_valence);
-
             % Make texture from the image array
             texture = Screen('MakeTexture', window_1, imageArray_valence);
-
             % Define the destination rectangle to draw the image in its original size
             dst_rect_valence = CenterRectOnPointd([0 0 size(imageArray_valence, 2) size(imageArray_valence, 1)], centerX, centerY);
-
             % Set text size and font
             Screen('TextSize', window_1, 40);
             Screen('TextFont', window_1, 'Arial');
-
             % Calculate positions for the circles
             circle_radius = 45;
             contour_thickness = 3;
@@ -317,7 +317,6 @@ while trial_ <= n
             total_length = 8 * space_between_circles + 2 * (circle_radius + contour_thickness);
             start_x = centerX - total_length / 2 + circle_radius + contour_thickness;
             y_position = centerY + size(imageArray_valence, 1) / 2 + 100;
-
             % Initialize variables for circle clicks
             clicked_in_circle = false;
             clicked_circle_index = 0;
@@ -338,7 +337,7 @@ while trial_ <= n
                         [current_x - circle_radius, y_position - circle_radius, ...
                         current_x + circle_radius, y_position + circle_radius]);
 
-                     % Draw the number centered in the circle
+                    % Draw the number centered in the circle
                     number_str = num2str(i);
                     text_bounds = Screen('TextBounds', window_1, number_str);
                     text_width = text_bounds(3) - text_bounds(1);
@@ -349,7 +348,7 @@ while trial_ <= n
                 end
 
                 % Update the display
-                ValenceTime = Screen('Flip', window_1);
+                ValenceTime = Screen('Flip', window_1); 
                 % -------------------------------------------
                 parallel_port(5);   % Send to NetStation
                 eventOnsets(event_) = GetSecs - start_exp;
@@ -357,10 +356,6 @@ while trial_ <= n
                 eventValues(event_) = 5;  % Store the event value
                 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
                 % -------------------------------------------
-                Valence_Time(trial_) = ValenceTime - start_exp;  % Store the elapsed time since the experiment started
-                disp('Valence_Time:')
-                disp(Valence_Time)
-
                 % Check for mouse clicks
                 [clicks, x, y, whichButton] = GetClicks(window_1, 0);
                 if clicks
@@ -368,11 +363,12 @@ while trial_ <= n
                         current_x = start_x + (i-1) * space_between_circles;
                         distance_squared = (x - current_x)^2 + (y - y_position)^2;
                         if distance_squared <= circle_radius^2
-                            clicked_circle_index = i;  % Update the clicked circle index
-                            clicked_in_circle = true;
+                            rt_valence(trial_)    = GetSecs - ValenceTime;
+                            clicked_circle_index  = i;  % Update the clicked circle index
+                            clicked_in_circle     = true;
                             choiceValence(trial_) = i;
-                            disp('choice_Valence')
-                            disp(choiceValence)
+                            fprintf('Valence rating is %d\n', choiceValence(trial_))
+                            elCreateVariables(trial_, videoFile, rt_valence(trial_)) % rt in ms
                             break;  % Exit the for loop since circle is found
                         end
                     end
@@ -389,20 +385,15 @@ while trial_ <= n
         case 6
             SetMouse(centerX, centerY, window_1);
             file_arousal = fullfile(allstim_path,'Score_Arousal.png');
-
             % Load the image from the file
             imageArray_arousal = imread(file_arousal);
-
             % Make texture from the image array
             texture = Screen('MakeTexture', window_1, imageArray_arousal);
-
             % Define the destination rectangle to draw the image in its original size
             dst_rect_arousal = CenterRectOnPointd([0 0 size(imageArray_arousal, 2) size(imageArray_arousal, 1)], centerX, centerY);
-
             % Set text size and font
             Screen('TextSize', window_1, 40);
             Screen('TextFont', window_1, 'Arial');
-
             % Calculate positions for the circles
             circle_radius = 45;
             contour_thickness = 3;
@@ -410,7 +401,6 @@ while trial_ <= n
             total_length = 8 * space_between_circles + 2 * (circle_radius + contour_thickness);
             start_x = centerX - total_length / 2 + circle_radius + contour_thickness;
             y_position = centerY + size(imageArray_valence, 1) / 2 + 100;
-
             % Initialize variables for circle clicks
             clicked_in_circle = false;
             clicked_circle_index = 0;
@@ -450,13 +440,6 @@ while trial_ <= n
                 eventValues(event_) = 6;  % Store the event value
                 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
                 % -------------------------------------------
-                Arousal_Time(trial_) = ArousalTime - start_exp;  % Store the elapsed time since the experiment started
-                disp('Arousal_Time:')
-                disp(Arousal_Time)
-                rt_valence(trial_) = Arousal_Time(trial_) - Valence_Time(trial_);
-                disp('rt_valence:')
-                disp(rt_valence)
-
                 % Check for mouse clicks
                 [clicks, x, y, whichButton] = GetClicks(window_1, 0);
                 if clicks
@@ -464,11 +447,12 @@ while trial_ <= n
                         current_x = start_x + (i-1) * space_between_circles;
                         distance_squared = (x - current_x)^2 + (y - y_position)^2;
                         if distance_squared <= circle_radius^2
+                            rt_arousal(trial_)   = GetSecs - ArousalTime;
                             clicked_circle_index = i;  % Update the clicked circle index
                             clicked_in_circle = true;
                             choiceArousal(trial_) = i;
-                            disp('choice_Arousal')
-                            disp(choiceArousal)
+                            fprintf('Arousal rating is %d\n', choiceArousal(trial_))
+                            elCreateVariables(trial_, videoFile, rt_arousal(trial_))
                             HideCursor;
                             break;  % Exit the for loop since circle is found
                         end
@@ -492,21 +476,23 @@ while trial_ <= n
             eventValues(event_) = 7;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
             % -------------------------------------------
-            Blank_Time(trial_) = BlankTime - start_exp;  % Store the elapsed time since the experiment started
-            disp('Blank_Time:')
-            disp(Blank_Time)
-            rt_arousal(trial_) = Blank_Time(trial_) - Arousal_Time(trial_);
-            disp('rt_arousal:')
-            disp(rt_arousal)
-            % -------------------------------------------
-            % Wait for one second
             WaitSecs(1);
             % -------------------------------------------
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
+            % ------------------------------------------- End trial EL
+            Eyelink('Message','End of trial %d', trial_);
+            Eyelink('Message','TRIAL_RESULT 0');
+            % -------------------------------------------
             trial_ = trial_ + 1;  
-            state = 2; % Go back to state 2 for the next trial
-       
+            state  = 2;
+            % ------------------------------------------- New trial EL
+            Eyelink('Message', 'TRIALID %d', trial_);
+            Eyelink('Message', '!V CLEAR %d %d %d', el.backgroundcolour(1), el.backgroundcolour(2), el.backgroundcolour(3));
+            Eyelink('Command', 'record_status_message "TRIAL %d/%d"', trial_, n);
+            Eyelink('command','set_idle_mode');
+            Eyelink('command','clear_screen 0'); % clears tracker display
+            % -------------------------------------------
     end
 end
 
@@ -518,31 +504,18 @@ eventValues(event_) = 10;  % Store the event value
 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
 eventDurations(event_) = GetSecs - eventOnsets(event_);
 % ------------------------------------------------- Eyelink
-% Put tracker in idle/offline mode before closing file. Eyelink('SetOfflineMode') is recommended.
-% However if Eyelink('Command', 'set_idle_mode') is used, allow 50ms before closing the file as shown in the commented code:
-% Eyelink('Command', 'set_idle_mode'); % Put tracker in idle/offline mode
-WaitSecs(0.05); % Allow some time for transition  
-Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode
-Eyelink('Command', 'clear_screen 0'); % Clear Host PC backdrop graphics at the end of the experiment
-WaitSecs(0.5); % Allow some time before closing and transferring file
-Eyelink('CloseFile'); % Close EDF file on Host PC
-% Transfer a copy of the EDF file to Display PC
-transferFile; % See transferFile function
-cleanupEl;  % Clean up the experiment + eye tracker
+elFinish;
 
 % -------------------------------------------------------------------------
 %                          Convert Log File into TSV/XLSX
 % -------------------------------------------------------------------------
-
-addRunColumn = deal(data.input{3}, n);
-addSubColumn = deal(data.input{1}, n);
-% Add the run and subject columns to the log variables
-logOnsets = [logOnsets, addRunColumn];
+addRunColumn = ones(n,1).*str2double(data.input{3});
+addSubColumn = repmat(data.input{1}, n, 1);% Add the run and subject columns to the log variables
 
 if exportXlsx
     % Assuming logOnsets, logDurations, logTypes, logValues, logSamples are your log variables
-    logTable = table(logOnsets', logDurations', logTypes', logValues', logSamples', ...
-        'VariableNames', {'onset', 'duration', 'type', 'value', 'sample'});
+    logTable = table(addSubColumn, addRunColumn, choiceValence', rt_valence', choiceArousal', rt_arousal',...
+        'VariableNames', {'sub', 'run', 'valence', 'rt_valence', 'arousal', 'rt_arousal'});
     % Write the log table to an XLSX file
     writetable(logTable, [logs_path filesep data.text.logFileName '.xlsx']);
 end
