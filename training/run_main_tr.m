@@ -1,6 +1,6 @@
 % Main script for running Emotional Cities' experiment 2
 clear; close all; clc; % Clean workspace
-settings_main;         % Load all the settings from the file
+settings_main_tr;         % Load all the settings from the file
 HideCursor;
 
 % -------------------------------------------------------------------------
@@ -547,9 +547,3 @@ eventTable = table(eventOnsets', eventDurations', eventTypes', eventValues', eve
 % Write the table to a TSV file
 writetable(eventTable, [event_path filesep data.text.eventFileName '.tsv'], 'FileType', 'text', 'Delimiter', 'tab');
 end
-
-
-
-
-
-
