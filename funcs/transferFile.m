@@ -2,7 +2,7 @@
 % Allows for optional destination path which is different from experiment folder
 function transferFile
     try
-        if dummymode ==0 % If connected to EyeLink
+        if dummymode == 0 % If connected to EyeLink
             % Show 'Receiving data file...' text until file transfer is complete
             Screen('FillRect', window, el.backgroundcolour); % Prepare background on backbuffer
             Screen('DrawText', window, 'Receiving data file...', 5, height-35, 0); % Prepare text
@@ -11,7 +11,7 @@ function transferFile
             
             % Transfer EDF file to Host PC
             % [status =] Eyelink('ReceiveFile',['src'], ['dest'], ['dest_is_path'])
-            status = Eyelink('ReceiveFile');
+            status = Eyelink('ReceiveFile', );
             % Optionally uncomment below to change edf file name when a copy is transferred to the Display PC
             % % If <src> is omitted, tracker will send last opened data file.
             % % If <dest> is omitted, creates local file with source file name.

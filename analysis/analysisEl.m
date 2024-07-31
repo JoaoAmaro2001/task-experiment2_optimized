@@ -1,4 +1,9 @@
-filename_eye = 'demo.asc';
+% SFIX -> start fixation
+% EFIX -> end fixation
+% SSACC -> start saccade
+% ESACC -> end saccade
+
+filename_eye = 'test_1.asc';
 
 cfg = [];
 cfg.dataset = filename_eye;

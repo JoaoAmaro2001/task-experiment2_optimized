@@ -73,7 +73,7 @@ prompt={'Introduza o ID do participante',...
     'Linguagem da tarefa','Indique o número da sessão (run)'};
 dlg_title='Input';
 % default: no ID, eyetracker in dummy mode, sequence 1, pupilometry
-data.input = inputdlg(prompt,dlg_title,1,{'...','pt','1'});
+data.input = inputdlg(prompt,dlg_title,1,{'sub','pt','1'});
 % get time of experiment
 dateOfExp = datetime('now');
 
@@ -118,7 +118,7 @@ exportXlsx = true;
 exportTsv  = true;
 
 % Initialise EEG -> Open NetStationAcquisition and start recording
-input('Press Enter if NetStation Acquisition is running and recording.');
+% input('Press Enter if NetStation Acquisition is running and recording.');
 
 % -------------------------------------------------------------------------
 %                             SETUP SCREEN

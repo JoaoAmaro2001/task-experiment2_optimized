@@ -81,7 +81,7 @@ while trial_ <= n
             end
             % -------------------------------------------
             Eyelink('Message','Empatica Synch');
-            % Eyelink('command','record_status_message "Instructions Screen"');
+            Eyelink('command','record_status_message "Instructions Screen"');
             % -------------------------------------------
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
@@ -118,7 +118,7 @@ while trial_ <= n
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
             % -------------------------------------------
             Eyelink('Message','Eyes Closed');
-            % Eyelink('command','record_status_message "Eyes Closed"')
+            Eyelink('command','record_status_message "Eyes Closed"')
             % -------------------------------------------
             WaitSecs(30);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
@@ -153,7 +153,7 @@ while trial_ <= n
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
             % -------------------------------------------
             Eyelink('Message','Eyes Open');
-            % Eyelink('command','record_status_message "Eyes Open"')
+            Eyelink('command','record_status_message "Eyes Open"')
             % -------------------------------------------
             WaitSecs(30);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
@@ -187,9 +187,9 @@ while trial_ <= n
 %                             Cross
 % -------------------------------------------------------------------------
         case 2
+            Eyelink('Message','Fixation Cross');
             Eyelink('command','draw_cross %d %d',...
             data.format.resolx/2,data.format.resoly/2);
-            Eyelink('Message','Fixation Cross');
             % -----------------------------------------
             drawCross(window_1, W, H);
             tFixation = Screen('Flip', window_1);
@@ -211,9 +211,6 @@ while trial_ <= n
 %                             Video
 % -------------------------------------------------------------------------
         case 3
-            % Eyelink setup
-            elCheckRecording; % Check if everything is fine
-            Eyelink('Message', 'STIM_ONSET');
             % Define new dimensions for the video, 1.5x1.5 times smaller
             newWidth  = W / 1.5;
             newHeight = H / 1.5;
@@ -226,6 +223,10 @@ while trial_ <= n
             % important to select the correct sequence of videos
             videoFile = data.sequences.files{trial_};
             file      = fullfile(stim_path, videoFile);
+
+            % Eyelink setup
+            elCheckRecording; % Check if everything is fine
+            Eyelink('Message', strcat('STIM_ONSET_',videoFile));
 
             try
                 % Open the movie, start playback paused
@@ -288,6 +289,7 @@ while trial_ <= n
         % -------------------------------------------
         Screen('CloseMovie', movie);
         % -------------------------------------------
+        Eyelink('Message', strcat('STIM_OFFSET_',videoFile))
         WaitSecs(0.1);
         Eyelink('StopRecording');
         % -------------------------------------------
@@ -300,7 +302,7 @@ while trial_ <= n
             % Set the mouse cursor to the center of the screen
             ShowCursor;
             SetMouse(centerX, centerY, window_1);
-            file_valence = fullfile(allstim_path,'Score_Valence.png');
+            file_valence = fullfile(allstim_path,eval(strcat('Score_Valence', lanSuf, '.png')));
             % Load the image from the file
             imageArray_valence = imread(file_valence);
             % Make texture from the image array
@@ -311,12 +313,12 @@ while trial_ <= n
             Screen('TextSize', window_1, 40);
             Screen('TextFont', window_1, 'Arial');
             % Calculate positions for the circles
-            circle_radius = 45;
-            contour_thickness = 3;
-            space_between_circles = 175;
-            total_length = 8 * space_between_circles + 2 * (circle_radius + contour_thickness);
-            start_x = centerX - total_length / 2 + circle_radius + contour_thickness;
-            y_position = centerY + size(imageArray_valence, 1) / 2 + 100;
+            % % circle_radius = 45;
+            % % contour_thickness = 3;
+            % % space_between_circles = 175;
+            % % total_length = 8 * space_between_circles + 2 * (circle_radius + contour_thickness);
+            % % start_x = centerX - total_length / 2 + circle_radius + contour_thickness;
+            % % y_position = centerY + size(imageArray_valence, 1) / 2 + 100;
             % Initialize variables for circle clicks
             clicked_in_circle = false;
             clicked_circle_index = 0;
@@ -325,28 +327,29 @@ while trial_ <= n
                 % Draw the texture to the window
                 Screen('DrawTexture', window_1, texture, [], dst_rect_valence);
 
-                % Draw and number circles with contours
-                for i = 1:9
-                    current_x = start_x + (i-1) * space_between_circles;
+                % % Draw and number circles with contours
+                % for i = 1:9
+                %     current_x = start_x + (i-1) * space_between_circles;
 
-                    % Draw contour and circle
-                    Screen('FillOval', window_1, [0 0 0], ...
-                        [current_x - (circle_radius + contour_thickness), y_position - (circle_radius + contour_thickness), ...
-                        current_x + (circle_radius + contour_thickness), y_position + (circle_radius + contour_thickness)]);
-                    Screen('FillOval', window_1, [255 255 255], ...
-                        [current_x - circle_radius, y_position - circle_radius, ...
-                        current_x + circle_radius, y_position + circle_radius]);
+                %     % Draw contour and circle
+                %     Screen('FillOval', window_1, [0 0 0], ...
+                %         [current_x - (circle_radius + contour_thickness), y_position - (circle_radius + contour_thickness), ...
+                %         current_x + (circle_radius + contour_thickness), y_position + (circle_radius + contour_thickness)]);
+                %     Screen('FillOval', window_1, [255 255 255], ...
+                %         [current_x - circle_radius, y_position - circle_radius, ...
+                %         current_x + circle_radius, y_position + circle_radius]);
 
-                    % Draw the number centered in the circle
-                    number_str = num2str(i);
-                    text_bounds = Screen('TextBounds', window_1, number_str);
-                    text_width = text_bounds(3) - text_bounds(1);
-                    text_height = text_bounds(4) - text_bounds(2);
-                    text_x = current_x - text_width / 2;
-                    text_y = y_position - text_height / 2000;
-                    DrawFormattedText(window_1, number_str, text_x, text_y, [0 0 0]);
-                end
-
+                %     % Draw the number centered in the circle
+                %     number_str = num2str(i);
+                %     text_bounds = Screen('TextBounds', window_1, number_str);
+                %     text_width = text_bounds(3) - text_bounds(1);
+                %     text_height = text_bounds(4) - text_bounds(2);
+                %     text_x = current_x - text_width / 2;
+                %     text_y = y_position - text_height / 2000;
+                %     DrawFormattedText(window_1, number_str, text_x, text_y, [0 0 0]);
+                % end
+                
+                [start_x,y_position,space_between_circles,circle_radius] = drawCircles(centerX, centerY, imageArray_valence, window_1, 'surround', 0);
                 % Update the display
                 ValenceTime = Screen('Flip', window_1); 
                 % -------------------------------------------
@@ -369,6 +372,11 @@ while trial_ <= n
                             choiceValence(trial_) = i;
                             fprintf('Valence rating is %d\n', choiceValence(trial_))
                             elCreateVariables(trial_, videoFile, rt_valence(trial_)) % rt in ms
+                            % Redraw all circles
+                            Screen('DrawTexture', window_1, texture, [], dst_rect_valence);
+                            drawCircles(centerX, centerY, imageArray_valence, window_1, 'surround', i);
+                            Screen('Flip', window_1);
+                            pause(2);
                             break;  % Exit the for loop since circle is found
                         end
                     end
@@ -384,7 +392,7 @@ while trial_ <= n
 % -------------------------------------------------------------------------            
         case 6
             SetMouse(centerX, centerY, window_1);
-            file_arousal = fullfile(allstim_path,'Score_Arousal.png');
+            file_arousal = fullfile(allstim_path,eval(strcat('Score_Arousal', lanSuf, '.png')));
             % Load the image from the file
             imageArray_arousal = imread(file_arousal);
             % Make texture from the image array
