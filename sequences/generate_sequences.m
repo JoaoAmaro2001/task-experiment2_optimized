@@ -27,7 +27,7 @@ end
 
 if createSequence
 
-filesForEachSession = 36;
+filesForEachSession = 30;
 % Assign numbers to each file
 stimFilesCurated = dir(fullfile(stim_path, '*.avi'));
 numFiles = length(stimFilesCurated);
@@ -50,7 +50,7 @@ save('sequence1.mat', 'sequenceFiles', 'sequenceNumbers')
 
 % Perform second randomization for sequence2 (Ensure no overlap with sequence1)
 remainingNumbers = setdiff(randomOrder, sequenceNumbers);
-sequenceNumbers = remainingNumbers(1:36);
+sequenceNumbers = remainingNumbers(1:filesForEachSession);
 sequenceFiles = fileTable.FileName(sequenceNumbers);
 
 % Save

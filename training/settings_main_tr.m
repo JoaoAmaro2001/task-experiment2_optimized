@@ -4,7 +4,7 @@ setpath;
 % Directories
 docs_path     = fullfile(scripts,'docs');
 allstim_path  = fullfile(sourcedata, 'supp', 'allStimuli');
-stim_path     = fullfile(sourcedata, 'supp', 'stimuli');
+stim_path     = fullfile(sourcedata, 'supp', 'stimuliTraining');
 logs_path     = fullfile(sourcedata, 'supp', 'logfiles');
 event_path    = fullfile(sourcedata, 'supp', 'events');
 data_path     = fullfile(sourcedata, 'data');
@@ -73,7 +73,7 @@ prompt={'Introduza o ID do participante',...
     'Linguagem da tarefa','Indique o número da sessão (run)'};
 dlg_title='Input';
 % default: no ID, eyetracker in dummy mode, sequence 1, pupilometry
-data.input = inputdlg(prompt,dlg_title,1,{'...','pt','1'});
+data.input = inputdlg(prompt,dlg_title,1,{'SR','pt','1'});
 % get time of experiment
 dateOfExp = datetime('now');
 
@@ -90,35 +90,12 @@ data.text.logFileName       = ['sub-',data.input{1},'_task-', data.text.taskname
 data.text.eegFileName       = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_eeg'];
 data.text.eventFileName     = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_event'];
 
-% select sequence to use
-if str2double(data.input{3}) == 1
-    generate_sequences;  % Generate new stimuli sequence
-    sequence = load('sequences\sequence1.mat');
-elseif str2double(data.input{3}) == 2
-    sequence = load('sequences\sequence2.mat');
-else
-    warning('Selected sequence does not exist');
-end
-
-% save information from chosen sequence in the 'data' structure
-data.sequences.trialOrder = sequence.sequenceNumbers; 
-data.sequences.files      = sequence.sequenceFiles;
-
-% get subject id folder to store result files
-subjRootFolderName = ['sub-',data.input{1}];
-if ~isfolder(fullfile(data_path, subjRootFolderName))
-    mkdir(fullfile(data_path, subjRootFolderName));
-end
-
 % cleanup unused variables
 clear prompt dlg_title num_lines ppid scriptName ii
 
 % Settings for export options
-exportXlsx = true;
-exportTsv  = true;
-
-% Initialise EEG -> Open NetStationAcquisition and start recording
-input('Press Enter if NetStation Acquisition is running and recording.');
+exportXlsx = false;
+exportTsv  = false;
 
 % -------------------------------------------------------------------------
 %                             SETUP SCREEN

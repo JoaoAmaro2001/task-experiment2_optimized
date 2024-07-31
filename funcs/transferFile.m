@@ -11,7 +11,7 @@ function transferFile
             
             % Transfer EDF file to Host PC
             % [status =] Eyelink('ReceiveFile',['src'], ['dest'], ['dest_is_path'])
-            status = Eyelink('ReceiveFile', );
+            status = Eyelink('ReceiveFile');
             % Optionally uncomment below to change edf file name when a copy is transferred to the Display PC
             % % If <src> is omitted, tracker will send last opened data file.
             % % If <dest> is omitted, creates local file with source file name.

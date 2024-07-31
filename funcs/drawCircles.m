@@ -56,7 +56,7 @@ else
     text_width = text_bounds(3) - text_bounds(1);
     text_height = text_bounds(4) - text_bounds(2);
     text_x = current_x - text_width / 2;
-    text_y = y_position - text_height / 2;
+    text_y = y_position - text_height / 2000;
     DrawFormattedText(window, number_str, text_x, text_y, [0 0 0]);
 
     % Draw the green circle around the specified number
