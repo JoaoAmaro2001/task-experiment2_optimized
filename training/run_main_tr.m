@@ -90,7 +90,7 @@ while trial_ <= n
             % -------------------------------------------
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
-            state  = 1;  % Proceed to the message state (set to 1 to ignore baseline)
+            state  = 98;  % Proceed to the message state (set to 1 to ignore baseline)
 
 % -------------------------------------------------------------------------
 %                            Eyes closed Baseline
@@ -125,10 +125,10 @@ while trial_ <= n
             Eyelink('Message','Eyes Closed');
             % Eyelink('command','record_status_message "Eyes Closed"')
             % -------------------------------------------
-            WaitSecs(30);
+            WaitSecs(10);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
-            state  = 98;
+            state  = 97;
            
 % -------------------------------------------------------------------------
 %                            Eyes open Baseline
@@ -160,7 +160,7 @@ while trial_ <= n
             Eyelink('Message','Eyes Open');
             % Eyelink('command','record_status_message "Eyes Open"')
             % -------------------------------------------
-            WaitSecs(30);
+            WaitSecs(10);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
             state  = 1;

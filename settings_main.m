@@ -7,6 +7,7 @@ allstim_path  = fullfile(sourcedata, 'supp', 'allStimuli');
 stim_path     = fullfile(sourcedata, 'supp', 'stimuli');
 logs_path     = fullfile(sourcedata, 'supp', 'logfiles');
 event_path    = fullfile(sourcedata, 'supp', 'events');
+sequence_path = fullfile(sourcedata, 'supp', 'sequences');
 data_path     = fullfile(sourcedata, 'data');
 
 %  SCREEN SETUP
@@ -57,8 +58,8 @@ data.text.starting_en       = 'Starting in';
 data.text.starting_pt       = 'Começa em';
 data.text.baselineClosed_en = 'Baseline with eyes closed will start shortly';
 data.text.baselineClosed_pt = 'O periodo de relaxamento com olhos fechados começará em breve';
-data.text.baselineOpen_en   = 'Baseline with eyes closed will start shortly';
-data.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos fechados começará em breve';
+data.text.baselineOpen_en   = 'Baseline with eyes open will start shortly';
+data.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos abertos começará em breve';
 
 % get rating image & size
 imX = 1920; imY = 1080; % image resolution 1920x1080
@@ -89,16 +90,19 @@ data.text.elFileName        = ['sub-',data.input{1},'_task-', data.text.taskname
 data.text.logFileName       = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_log'];
 data.text.eegFileName       = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_eeg'];
 data.text.eventFileName     = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_event'];
+data.text.eventSequence     = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_seq'];
 
 % select sequence to use
 if str2double(data.input{3}) == 1
     generate_sequences;  % Generate new stimuli sequence
     sequence = load('sequences\sequence1.mat');
 elseif str2double(data.input{3}) == 2
+    filesForEachSession = 30;
     sequence = load('sequences\sequence2.mat');
 else
     warning('Selected sequence does not exist');
 end
+save(fullfile(sequence_path, data.text.eventSequence), 'sequence')
 
 % save information from chosen sequence in the 'data' structure
 data.sequences.trialOrder = sequence.sequenceNumbers; 

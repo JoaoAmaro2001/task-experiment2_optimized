@@ -11,8 +11,7 @@ HideCursor;
 %                       Set variables fot While Loop
 % -------------------------------------------------------------------------
 % Number of trials/videos based on available videos
-% n                 = filesForEachSession; 
-n =2
+n                 = filesForEachSession; 
 trial_            = 1;
 event_            = 1;
 
@@ -25,6 +24,7 @@ rt_valence        = zeros(1,n);
 rt_arousal        = zeros(1,n); 
 choiceValence     = zeros(1,n); 
 choiceArousal     = zeros(1,n);
+stim              = cell(1,n);
 
 % -------------------------------------------------------------------------
 %                       Set variables for event files
@@ -48,6 +48,7 @@ eventDurations  = zeros(1, numEvents); % Duration of event in seconds
 eventTypes      = cell(1, numEvents);  % Type of event, e.g., 'DI99', 'DI98'
 eventValues     = zeros(1, numEvents); % Numeric value to encode the event, optional
 eventSamples    = zeros(1, numEvents); % Sample number at which event occurs, optional
+eventTime       = cell(1, numEvents);  % Universal time given by datetime('now')
 
 % -------------------------------------------------------------------------
 %                       Start experiment
@@ -71,6 +72,7 @@ while trial_ <= n
             % -------------------------------------------
             parallel_port(99);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
+            eventTime{event_}   = datetime('now');
             eventTypes{event_}  = 'DI99';  % Store the event type
             eventValues(event_) = 99;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -90,7 +92,11 @@ while trial_ <= n
             % -------------------------------------------
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
-            state  = 1;  % Proceed to the message state (set to 1 to ignore baseline)
+            if str2double(data.input{3}) == 1
+            state  = 98;
+            elseif str2double(data.input{3}) == 2 % set to 1 to ignore baseline
+            state  = 1;
+            end
 
 % -------------------------------------------------------------------------
 %                            Eyes closed Baseline
@@ -118,6 +124,7 @@ while trial_ <= n
             % -------------------------------------------
             parallel_port(98);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
+            eventTime{event_}   = datetime('now');
             eventTypes{event_}  = 'DI98';  % Store the event type
             eventValues(event_) = 98;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -153,6 +160,7 @@ while trial_ <= n
             tFixation = Screen('Flip', window_1);
             parallel_port(97);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
+            eventTime{event_}   = datetime('now');
             eventTypes{event_}  = 'DI97';  % Store the event type
             eventValues(event_) = 97;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -175,6 +183,7 @@ while trial_ <= n
             % ------------------------------------------- EEG
             parallel_port(1);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
+            eventTime{event_}   = datetime('now');
             eventTypes{event_}  = 'DI1';  % Store the event type
             eventValues(event_) = 1;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -200,6 +209,7 @@ while trial_ <= n
             tFixation = Screen('Flip', window_1);
             parallel_port(2);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
+            eventTime{event_}   = datetime('now');
             eventTypes{event_}  = 'DI2';  % Store the event type
             eventValues(event_) = 2;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -226,8 +236,9 @@ while trial_ <= n
                 (W + newWidth) / 2, ...
                 (H + newHeight) / 2];
             % important to select the correct sequence of videos
-            videoFile = data.sequences.files{trial_};
-            file      = fullfile(stim_path, videoFile);
+            videoFile    = data.sequences.files{trial_};
+            file         = fullfile(stim_path, videoFile);
+            stim{trial_} = videoFile;
 
             % Eyelink setup
             elCheckRecording; % Check if everything is fine
@@ -246,6 +257,7 @@ while trial_ <= n
                     % -------------------------------------------
                     parallel_port(3);   % Send to NetStation
                     eventOnsets(event_) = GetSecs - start_exp;
+                    eventTime{event_}   = datetime('now');
                     eventTypes{event_}  = 'DI3';  % Store the event type
                     eventValues(event_) = 3;  % Store the event value
                     eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -261,6 +273,7 @@ while trial_ <= n
                 % -------------------------------------------
                 parallel_port(4);   % Send to NetStation
                 eventOnsets(event_) = GetSecs - start_exp;
+                eventTime{event_}   = datetime('now');
                 eventTypes{event_}  = 'DI4';  % Store the event type
                 eventValues(event_) = 4;  % Store the event value
                 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -331,6 +344,7 @@ while trial_ <= n
                 % -------------------------------------------
                 parallel_port(5);   % Send to NetStation
                 eventOnsets(event_) = GetSecs - start_exp;
+                eventTime{event_}   = datetime('now');
                 eventTypes{event_}  = 'DI5';  % Store the event type
                 eventValues(event_) = 5;  % Store the event value
                 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -392,6 +406,7 @@ while trial_ <= n
                 % -------------------------------------------
                 parallel_port(6);   % Send to NetStation
                 eventOnsets(event_) = GetSecs - start_exp;
+                eventTime{event_}   = datetime('now');
                 eventTypes{event_}  = 'DI6';  % Store the event type
                 eventValues(event_) = 6;  % Store the event value
                 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -437,6 +452,7 @@ while trial_ <= n
             % -------------------------------------------
             parallel_port(7);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
+            eventTime{event_}   = datetime('now');
             eventTypes{event_}  = 'DI7';  % Store the event type
             eventValues(event_) = 7;  % Store the event value
             eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -464,6 +480,7 @@ end
 % ------------------------------------------------- EEG
 parallel_port(10);   % Send end event to NetStation
 eventOnsets(event_) = GetSecs - start_exp;
+eventTime{event_}   = datetime('now');
 eventTypes{event_}  = 'DI10';  % Store the event type
 eventValues(event_) = 10;  % Store the event value
 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
@@ -479,16 +496,13 @@ addSubColumn = repmat(data.input{1}, n, 1);% Add the run and subject columns to 
 
 if exportXlsx
     % Assuming logOnsets, logDurations, logTypes, logValues, logSamples are your log variables
-    logTable = table(addSubColumn, addRunColumn, choiceValence', rt_valence', choiceArousal', rt_arousal',...
-        'VariableNames', {'sub', 'run', 'valence', 'rt_valence', 'arousal', 'rt_arousal'});
+    logTable = table(addSubColumn, addRunColumn, choiceValence', rt_valence', choiceArousal', rt_arousal', stim',...
+        'VariableNames', {'sub', 'run', 'valence', 'rt_valence', 'arousal', 'rt_arousal', 'stimulus'});
     % Write the log table to an XLSX file
     writetable(logTable, [logs_path filesep data.text.logFileName '.xlsx']);
 end
 
 if exportTsv
-    % Assuming the same log variables as above
-    logTable = table(logOnsets', logDurations', logTypes', logValues', logSamples', ...
-        'VariableNames', {'onset', 'duration', 'type', 'value', 'sample'});
     % Write the log table to a TSV file
     writetable(logTable, [logs_path filesep data.text.logFileName '.tsv'], 'FileType', 'text', 'Delimiter', '\t');
 end
@@ -499,22 +513,37 @@ end
 
 if exportXlsx
 % Create a table from the event data
-eventTable = table(eventOnsets', eventDurations', eventTypes', eventValues', eventSamples', ...
-    'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample'});
+eventTable = table(eventOnsets', eventDurations', eventTypes', eventValues', eventSamples', eventTime', ...
+    'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample','time'});
 % Write the table to an XLSX file
 writetable(eventTable, [event_path filesep data.text.eventFileName '.xlsx']);
 end
 
 if exportTsv
-% Create a table from the event data
-eventTable = table(eventOnsets', eventDurations', eventTypes', eventValues', eventSamples', ...
-    'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample'});
 % Write the table to a TSV file
 writetable(eventTable, [event_path filesep data.text.eventFileName '.tsv'], 'FileType', 'text', 'Delimiter', 'tab');
 end
 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
+% % Get stimulus for first one using the ascii file an searching for .avi
+% % Get stimulus for first one using the sequences file and confirming
+% with the ascii file
+% % Add info to logFile
 
+% % Participant info:
+
+% SR001:
+% 57,5 cm 
+% 19*2
+% 17.5*2
+% 18º
+% -------
+% SR002:
+% 60 cm
+% 36.5
+% 36
+% 18º
 
 
 

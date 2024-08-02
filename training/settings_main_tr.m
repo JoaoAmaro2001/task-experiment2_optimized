@@ -57,8 +57,8 @@ data.text.starting_en       = 'Starting in';
 data.text.starting_pt       = 'Começa em';
 data.text.baselineClosed_en = 'Baseline with eyes closed will start shortly';
 data.text.baselineClosed_pt = 'O periodo de relaxamento com olhos fechados começará em breve';
-data.text.baselineOpen_en   = 'Baseline with eyes closed will start shortly';
-data.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos fechados começará em breve';
+data.text.baselineOpen_en   = 'Baseline with eyes open will start shortly';
+data.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos abertos começará em breve';
 
 % get rating image & size
 imX = 1920; imY = 1080; % image resolution 1920x1080

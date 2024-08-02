@@ -3,7 +3,7 @@
 % SSACC -> start saccade
 % ESACC -> end saccade
 
-filename_eye = 'test_1.asc';
+filename_eye = 'C:\Exp_2_optimized-video_rating\sourcedata\supp\eyelinkAscii\SR001_1.asc';
 
 cfg = [];
 cfg.dataset = filename_eye;
