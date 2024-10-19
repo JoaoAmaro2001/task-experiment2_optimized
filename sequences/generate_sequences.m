@@ -40,7 +40,7 @@ fileTable = table(fileNumbers', fileNames, 'VariableNames', {'Number', 'FileName
 % Randomize numbers
 randomOrder = randperm(numFiles);
 
-% Select 36 numbers for the first sequence
+% Select 30 numbers for the first sequence
 sequenceNumbers = randomOrder(1:filesForEachSession);
 sequenceFiles = fileTable.FileName(sequenceNumbers);
 

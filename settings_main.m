@@ -94,9 +94,11 @@ data.text.eventSequence     = ['sub-',data.input{1},'_task-', data.text.taskname
 
 % select sequence to use
 if str2double(data.input{3}) == 1
+    run = 1;
     generate_sequences;  % Generate new stimuli sequence
     sequence = load('sequences\sequence1.mat');
 elseif str2double(data.input{3}) == 2
+    run = 2;
     filesForEachSession = 30;
     sequence = load('sequences\sequence2.mat');
 else

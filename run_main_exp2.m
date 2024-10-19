@@ -57,8 +57,14 @@ eventTime       = cell(1, numEvents);  % Universal time given by datetime('now')
 % Wait fot user input to start the experiment
 % input('Press Enter to start the task.');
 
-% Start with state 99
-state     = 99;   
+if run==1
+    % Start with state 99
+    state     = 99;
+elseif run==2
+    % Start with state 1 and skip baseline
+    state     = 1;
+end
+
 
 while trial_ <= n
 
@@ -68,7 +74,9 @@ while trial_ <= n
 %                  Countdown for empatica sync
 % -------------------------------------------------------------------------
         case 99
+            if run==1
             start_exp = GetSecs;
+            end
             % -------------------------------------------
             parallel_port(99);   % Send to NetStation
             eventOnsets(event_) = GetSecs - start_exp;
@@ -95,7 +103,7 @@ while trial_ <= n
             if str2double(data.input{3}) == 1
             state  = 98;
             elseif str2double(data.input{3}) == 2 % set to 1 to ignore baseline
-            state  = 1;
+            state  = 98;
             end
 
 % -------------------------------------------------------------------------
@@ -177,6 +185,9 @@ while trial_ <= n
 %                             Message
 % -------------------------------------------------------------------------
         case 1
+            if run==2
+            start_exp = GetSecs;
+            end
             Screen('TextSize', window_1, 50);
             DrawFormattedText(window_1, eval(strcat('data.text.getready', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
@@ -538,12 +549,38 @@ end
 % 19*2
 % 17.5*2
 % 18º
+% No datetime information!
 % -------
 % SR002:
 % 60 cm
 % 36.5
 % 36
 % 18º
-
-
+% No datetime information!
+% -------
+% SR006:
+% 57.5 cm
+% 34
+% 36
+% 26º (not working)
+% Baseline was performed at the beginning of the second run.
+% -------
+% SR008:
+% 57 cm
+% 37
+% 36
+% 26º (not working)
+% -------
+% SR004:
+% 53.5 cm
+% 17*2
+% 16*2
+% Eye-tracking not good
+% Empatica only recorded for 2nd run
+% -------
+% SR007:
+% 56.5 cm
+% 17*2
+% 19*2
+% Geoscan not good
 

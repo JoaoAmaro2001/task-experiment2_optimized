@@ -69,4 +69,4 @@ end
 addpath(genpath(scripts))
 addpath('C:\toolbox\Psychtoolbox')
 addpath('C:\toolbox\fieldtrip-20240722')
-addpath('C:\toolbox\eeglab2024.0')
+addpath('C:\toolbox\eeglab2024.2')
