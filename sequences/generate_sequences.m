@@ -50,7 +50,7 @@ save('sequence1.mat', 'sequenceFiles', 'sequenceNumbers')
 
 % Perform second randomization for sequence2 (Ensure no overlap with sequence1)
 remainingNumbers = setdiff(randomOrder, sequenceNumbers);
-sequenceNumbers = remainingNumbers(1:filesForEachSession);
+sequenceNumbers = remainingNumbers(randperm(filesForEachSession)); % Re-shuffle!!!
 sequenceFiles = fileTable.FileName(sequenceNumbers);
 
 % Save
