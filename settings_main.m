@@ -1,6 +1,9 @@
 % Init pc-specific paths and variables
 setpath; cd(scripts);
 
+% Check version ('(R2018a)' or "R2024a")
+% ver_info = matlabRelease;
+
 % Directories
 docs_path     = fullfile(scripts,'docs');
 allstim_path  = fullfile(sourcedata, 'supp', 'allStimuli');
@@ -53,13 +56,13 @@ keyM = KbName('m'); % 7
 % instructions definition
 data.text.taskname          = 'videorating';
 data.text.getready_en       = 'The experiment will start shortly... Keep your eyes fixed on the cross';
-data.text.getready_pt       = 'A experiÃªncia comeÃ§arÃ¡ em breve... Mantenha o olhar fixo na cruz';
+data.text.getready_pt       = 'A experiência começará em breve... Mantenha o olhar fixo na cruz';
 data.text.starting_en       = 'Starting in';
-data.text.starting_pt       = 'ComeÃ§a em';
+data.text.starting_pt       = 'Começa em';
 data.text.baselineClosed_en = 'Baseline with eyes closed will start shortly';
-data.text.baselineClosed_pt = 'O periodo de relaxamento com olhos fechados comeÃ§arÃ¡ em breve';
+data.text.baselineClosed_pt = 'O período de relaxamento com olhos fechados começará em breve';
 data.text.baselineOpen_en   = 'Baseline with eyes open will start shortly';
-data.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos abertos comeÃ§arÃ¡ em breve';
+data.text.baselineOpen_pt   = 'O período de relaxamento com olhos abertos começará em breve';
 
 % get rating image & size
 imX = 1920; imY = 1080; % image resolution 1920x1080
@@ -71,7 +74,7 @@ clear imX imY; % cleanup unused variables
 % user input - participant information
 % get user input for usage or not of eyelink
 prompt={'Introduza o ID do participante',...
-    'Linguagem da tarefa','Indique o nÃºmero da sessÃ£o (run)'};
+    'Linguagem da tarefa','Indique o número da sessão (run)'};
 dlg_title='Input';
 % Fot this experiment participant_id will be SRxxx (scenario rating)
 data.input = inputdlg(prompt,dlg_title,1,{'SR','pt','1'});

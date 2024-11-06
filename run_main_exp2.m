@@ -153,7 +153,7 @@ while trial_ <= n
             DrawFormattedText(window_1, eval(strcat('data.text.baselineOpen', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             WaitSecs(5);
-            countdown_from = 5; % Start countdown from 10
+            countdown_from = 5; % Start countdown
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
                 Screen('TextFont', window_1, 'Arial');
@@ -583,4 +583,12 @@ end
 % 17*2
 % 19*2
 % Geoscan not good
+% -------
+% SR011:
+% 55 cm
+% 16*2
+% 17*2
+% Geoscan interpolated around 10 electrodes, but looked good.
+% Empatica recording for longer than needed
+% ET not validated for first run
 
