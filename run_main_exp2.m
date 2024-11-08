@@ -247,7 +247,7 @@ while trial_ <= n
                 (W + newWidth) / 2, ...
                 (H + newHeight) / 2];
             % important to select the correct sequence of videos
-            videoFile    = data.sequences.files{trial_};
+            videoFile    = data.sequences.files{trial_}; disp(videoFile);
             file         = fullfile(stim_path, videoFile);
             stim{trial_} = videoFile;
 
