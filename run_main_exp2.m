@@ -68,6 +68,14 @@ end
 
 while trial_ <= n
 
+    % MANUAL CONTROL 
+    [keyIsDown, ~, keyCode] = KbCheck; % Check for keyboard press
+    if keyIsDown
+        if keyCode(keyX) % Check if the terminate key (x) was pressed
+            break % Exit the function or script
+        end
+    end
+
     switch state
 
 % -------------------------------------------------------------------------
@@ -176,7 +184,7 @@ while trial_ <= n
             Eyelink('Message','Eyes Open');
             Eyelink('command','record_status_message "Eyes Open"')
             % -------------------------------------------
-            WaitSecs(30);
+            WaitSecs(5);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
             state  = 1;
@@ -203,7 +211,7 @@ while trial_ <= n
             Eyelink('Message', '!V CLEAR %d %d %d', el.backgroundcolour(1), el.backgroundcolour(2), el.backgroundcolour(3));
             Eyelink('Command', 'record_status_message "TRIAL %d/%d"', trial_, n);
             % -------------------------------------------
-            WaitSecs(5);
+            WaitSecs(30);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
             state = 2;
@@ -247,7 +255,8 @@ while trial_ <= n
                 (W + newWidth) / 2, ...
                 (H + newHeight) / 2];
             % important to select the correct sequence of videos
-            videoFile    = data.sequences.files{trial_}; disp(videoFile);
+            videoFile    = data.sequences.files{trial_}; 
+            fprintf('Stimulus - %s; Trial nº %d\n',videoFile, trial_);
             file         = fullfile(stim_path, videoFile);
             stim{trial_} = videoFile;
 

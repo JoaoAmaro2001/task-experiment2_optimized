@@ -110,7 +110,6 @@ end
 save(fullfile(sequence_path, data.text.eventSequence), 'sequence')
 
 % save information from chosen sequence in the 'data' structure
-data.sequences.trialOrder = sequence.sequenceNumbers; 
 data.sequences.files      = sequence.sequenceFiles;
 
 % get subject id folder to store result files
