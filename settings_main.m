@@ -15,8 +15,8 @@ data_path     = fullfile(sourcedata, 'data');
 
 %  SCREEN SETUP
 output_screen = 2; % 1 for primary, 2 for secondary, ...
-screens = Screen('Screens');
-screenNumber = max(screens);
+screens       = Screen('Screens');
+screenNumber  = max(screens);
 
 if screenNumber > 0 % find out if there is more than one screen
     dual = get(0,'MonitorPositions');
@@ -35,9 +35,9 @@ clear output_screen screens resolution dual
 AssertOpenGL; % gives warning if running in PC with non-OpenGL based PTB
 
 % Formatting options
-data.format.fontSize = 40;
+data.format.fontSize         = 40;
 data.format.fontSizeFixation = 120;
-data.format.font = 'Arial';
+data.format.font             = 'Arial';
 data.format.background_color = [255 255 255]; % grey 150!
 % initialise system for key query - changed 'UnifyKeyNames' to 'KeyNames' due to
 % the keyboard usage
@@ -95,22 +95,30 @@ data.text.eegFileName       = ['sub-',data.input{1},'_task-', data.text.taskname
 data.text.eventFileName     = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_event'];
 data.text.eventSequence     = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_seq'];
 
+% Task parameters
+data.task.numberOfRuns         = 2;
+data.task.stimsPerRun          = 30;
+data.task.eyes_closed_duration = 1; % in secs
+data.task.eyes_open_duration   = 1; % in secs
+data.task.preparation_duration = 5;  % in secs
+
 % select sequence to use
 if str2double(data.input{3}) == 1
     run = 1;
     generate_sequences;  % Generate new stimuli sequence
-    sequence = load('sequences\sequence1.mat');
+    sequence1 = load('sequences\sequence1.mat');
+    % save information from chosen sequence in the 'data' structure
+    data.sequences.files = sequence1.sequenceFiles1;
+    save(fullfile(sequence_path, data.text.eventSequence), 'sequence1')
 elseif str2double(data.input{3}) == 2
     run = 2;
-    filesForEachSession = 30;
-    sequence = load('sequences\sequence2.mat');
+    sequence2 = load('sequences\sequence2.mat');
+    % save information from chosen sequence in the 'data' structure
+    data.sequences.files = sequence2.sequenceFiles2;
+    save(fullfile(sequence_path, data.text.eventSequence), 'sequence2')
 else
     warning('Selected sequence does not exist');
 end
-save(fullfile(sequence_path, data.text.eventSequence), 'sequence')
-
-% save information from chosen sequence in the 'data' structure
-data.sequences.files      = sequence.sequenceFiles;
 
 % get subject id folder to store result files
 subjRootFolderName = ['sub-',data.input{1}];
@@ -134,7 +142,7 @@ input('Press Enter if NetStation Acquisition is running and recording.');
 backgroundColor = 255; % Background color: choose a number from 0 (black) to 255 (white)
 textColor = 0;         % Text color: choose a number from 0 (black) to 255 (white)
 clear screen
-Screen('Preference', 'SkipSyncTests', 1);   % Is this safe?
+Screen('Preference', 'SkipSyncTests', 0);   % Is this safe?
 Screen('Preference','VisualDebugLevel', 0); % Minimum amount of diagnostic output
 
 % -------------------------------------------------------------------------

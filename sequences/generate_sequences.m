@@ -1,3 +1,6 @@
+% Transform this script into a function!
+
+% Run setpath
 setpath;
 
 % Directories
@@ -27,10 +30,13 @@ end
 % ------------------------------------------------------------------
 
 if createSequence
+    
+    % Task vars
+    filesForEachRun = 30;
+    numOfRuns       = 2; 
 
     if strcmpi(method,'real-time')
 
-    filesForEachSession = 30;
     % Assign numbers to each file
     stimFilesCurated = dir(fullfile(stim_path, '*.avi'));
     numFiles = length(stimFilesCurated);
@@ -53,7 +59,7 @@ if createSequence
     
     % % Perform second randomization for sequence2 (Ensure no overlap with sequence1)
     remainingNumbers = setdiff(randomOrder, sequenceNumbers);
-    sequenceNumbers = remainingNumbers(randperm(filesForEachSession)); % Re-shuffle!!!
+    sequenceNumbers = remainingNumbers(randperm(filesForEachRun)); % Re-shuffle!!!
     sequenceFiles = fileTable.FileName(sequenceNumbers);
     
     % Save
@@ -62,7 +68,7 @@ if createSequence
     elseif strcmpi(method,'pre-built')
 
     % Files for each run (half)
-    filesForEachSession = 30;
+    filesForEachRun = 30;
 
     % Assign numbers to each file
     stimFilesCurated = dir(fullfile(stim_path, '*.avi'));
@@ -78,15 +84,20 @@ if createSequence
     sequenceFilesComplete = fileTable.FileName;
     sequenceFilesComplete(randomOrder) = fileTable.FileName;
     % Save run 1 sequence
-    sequenceFiles = sequenceFilesComplete(1:filesForEachSession)    
+    sequenceFiles1 = sequenceFilesComplete(1:filesForEachRun);   
     cd(fullfile(scripts,'sequences'))
-    save('sequence1.mat', 'sequenceFiles', 'randomOrder')
+    save('sequence1.mat', 'sequenceFiles1', 'randomOrder')
     % Save run 2 sequence
-    sequenceFiles = sequenceFilesComplete(filesForEachSession+1:end)       
+    sequenceFiles2 = sequenceFilesComplete(filesForEachRun+1:end);       
     cd(fullfile(scripts,'sequences'))
-    save('sequence2.mat', 'sequenceFiles', 'randomOrder')
+    save('sequence2.mat', 'sequenceFiles2', 'randomOrder')
+    % Output sequence side by side
+    out_sequence = {sequenceFiles1{:}; sequenceFiles2{:}};
+    disp(out_sequence');
+    if length(unique(out_sequence))~=filesForEachRun*numOfRuns
+        error('Stimulus randomization went wrong...')
     end
-
+    end
 end
 
 cd(scripts)

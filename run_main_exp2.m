@@ -1,8 +1,10 @@
 % Main script for running Emotional Cities' experiment 2
 % Hit 'o' after doing the eyetracker calibration
 % Hit 'esc' on the training script to start the task
+% Hit 'x' to terminate the task
 
 % -------------------------------------------------------------------------
+
 clear; close all; clc; % Clean workspace
 settings_main;         % Load all the settings from the file
 HideCursor;
@@ -11,7 +13,7 @@ HideCursor;
 %                       Set variables fot While Loop
 % -------------------------------------------------------------------------
 % Number of trials/videos based on available videos
-n                 = filesForEachSession; 
+n                 = data.task.stimsPerRun; 
 trial_            = 1;
 event_            = 1;
 
@@ -42,7 +44,7 @@ stim              = cell(1,n);
 % DIN6  - parallel_port(6)  -> Arousal
 % DIN7  - parallel_port(7)  -> Blank Screen
 
-numEvents       = 3 + 7*n; % Equal to number of sent DINs
+numEvents       = 3 + 7*n;             % Equal to number of sent DINs
 eventOnsets     = zeros(1, numEvents); % Time of event onset in seconds
 eventDurations  = zeros(1, numEvents); % Duration of event in seconds
 eventTypes      = cell(1, numEvents);  % Type of event, e.g., 'DI99', 'DI98'
@@ -96,7 +98,7 @@ while trial_ <= n
             countdown_from = 10; % Start countdown from 10
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
-                Screen('TextFont', window_1, 'Arial');
+                Screen('TextFont', window_1, data.format.font);
                 message = sprintf(strcat(eval(strcat('data.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
@@ -108,11 +110,7 @@ while trial_ <= n
             % -------------------------------------------
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
-            if str2double(data.input{3}) == 1
             state  = 98;
-            elseif str2double(data.input{3}) == 2 % set to 1 to ignore baseline
-            state  = 98;
-            end
 
 % -------------------------------------------------------------------------
 %                            Eyes closed Baseline
@@ -127,7 +125,7 @@ while trial_ <= n
             countdown_from = 5; % Start countdown from 10
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
-                Screen('TextFont', window_1, 'Arial');
+                Screen('TextFont', window_1, data.format.font);
                 message = sprintf(strcat( eval(strcat('data.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
@@ -148,7 +146,7 @@ while trial_ <= n
             Eyelink('Message','Eyes Closed');
             Eyelink('command','record_status_message "Eyes Closed"')
             % -------------------------------------------
-            WaitSecs(30);
+            WaitSecs(data.task.eyes_closed_duration);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
             state  = 97;
@@ -164,7 +162,7 @@ while trial_ <= n
             countdown_from = 5; % Start countdown
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
-                Screen('TextFont', window_1, 'Arial');
+                Screen('TextFont', window_1, data.format.font);
                 message = sprintf(strcat( eval(strcat('data.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
@@ -184,7 +182,7 @@ while trial_ <= n
             Eyelink('Message','Eyes Open');
             Eyelink('command','record_status_message "Eyes Open"')
             % -------------------------------------------
-            WaitSecs(5);
+            WaitSecs(data.task.eyes_open_duration);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
             state  = 1;
@@ -211,7 +209,7 @@ while trial_ <= n
             Eyelink('Message', '!V CLEAR %d %d %d', el.backgroundcolour(1), el.backgroundcolour(2), el.backgroundcolour(3));
             Eyelink('Command', 'record_status_message "TRIAL %d/%d"', trial_, n);
             % -------------------------------------------
-            WaitSecs(30);
+            WaitSecs(data.task.preparation_duration);
             eventDurations(event_) = GetSecs - eventOnsets(event_);
             event_ = event_ + 1;
             state = 2;
@@ -257,6 +255,7 @@ while trial_ <= n
             % important to select the correct sequence of videos
             videoFile    = data.sequences.files{trial_}; 
             fprintf('Stimulus - %s; Trial nº %d\n',videoFile, trial_);
+            fprintf('Time elapsed since beginning: %f minutes\n', (GetSecs-start_exp)/60);
             file         = fullfile(stim_path, videoFile);
             stim{trial_} = videoFile;
 
@@ -349,7 +348,7 @@ while trial_ <= n
             dst_rect_valence = CenterRectOnPointd([0 0 size(imageArray_valence, 2) size(imageArray_valence, 1)], centerX, centerY);
             % Set text size and font
             Screen('TextSize', window_1, 40);
-            Screen('TextFont', window_1, 'Arial');
+            Screen('TextFont', window_1, data.format.font);
             % Initialize variables for circle clicks
             clicked_in_circle = false;
             clicked_circle_index = 0;
@@ -411,7 +410,7 @@ while trial_ <= n
             dst_rect_arousal = CenterRectOnPointd([0 0 size(imageArray_arousal, 2) size(imageArray_arousal, 1)], centerX, centerY);
             % Set text size and font
             Screen('TextSize', window_1, 40);
-            Screen('TextFont', window_1, 'Arial');
+            Screen('TextFont', window_1, data.format.font);
             % Initialize variables for circle clicks
             clicked_in_circle = false;
             clicked_circle_index = 0;
@@ -543,13 +542,13 @@ if exportTsv
 % Write the table to a TSV file
 writetable(eventTable, [event_path filesep data.text.eventFileName '.tsv'], 'FileType', 'text', 'Delimiter', 'tab');
 end
-
+cd(scripts)
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-% % Get stimulus for first one using the ascii file an searching for .avi
-% % Get stimulus for first one using the sequences file and confirming
+% Get stimulus for first one using the ascii file an searching for .avi
+% Get stimulus for first one using the sequences file and confirming
 % with the ascii file
-% % Add info to logFile
+% Add info to logFile
 
 % % Participant info:
 
