@@ -2,12 +2,19 @@
 % Hit 'o' after doing the eyetracker calibration
 % Hit 'esc' on the training script to start the task
 % Hit 'x' to terminate the task
-
 % -------------------------------------------------------------------------
 
 clear; close all; clc; % Clean workspace
 settings_main;         % Load all the settings from the file
 HideCursor;
+
+% -------------------------------------------------------------------------
+% IMPORTANT!!!!!!!!!!
+% If you accidentally started run 1 instead of run 2:
+% 1) load the randomized trail sequence present in the sequences folder
+% 2) uncomment and run the following line of code!!!
+% load('C:\github\JoaoAmaro2001\task-experiment2_optimized\sequences\ranseq-20250721_154554.mat')
+% data.sequences.files = sequenceFilesComplete(30+1:end);       
 
 % -------------------------------------------------------------------------
 %                       Set variables fot While Loop
@@ -281,6 +288,7 @@ while trial_ <= n
                     eventValues(event_) = 3;  % Store the event value
                     eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
                     % -------------------------------------------
+                    % There is no need to hold the first frame since the first frame is already paused for 1 second in the video itself
                     % WaitSecs(1);  % Hold the first frame for 1.5 seconds (Not 1 sec?)
                     Screen('Close', tex);  % Close the texture
                     eventDurations(event_) = GetSecs - eventOnsets(event_);
@@ -543,60 +551,3 @@ if exportTsv
 writetable(eventTable, [event_path filesep data.text.eventFileName '.tsv'], 'FileType', 'text', 'Delimiter', 'tab');
 end
 cd(scripts)
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-% Get stimulus for first one using the ascii file an searching for .avi
-% Get stimulus for first one using the sequences file and confirming
-% with the ascii file
-% Add info to logFile
-
-% % Participant info:
-
-% SR001:
-% 57,5 cm 
-% 19*2
-% 17.5*2
-% 18º
-% No datetime information!
-% -------
-% SR002:
-% 60 cm
-% 36.5
-% 36
-% 18º
-% No datetime information!
-% -------
-% SR006:
-% 57.5 cm
-% 34
-% 36
-% 26º (not working)
-% Baseline was performed at the beginning of the second run.
-% -------
-% SR008:
-% 57 cm
-% 37
-% 36
-% 26º (not working)
-% -------
-% SR004:
-% 53.5 cm
-% 17*2
-% 16*2
-% Eye-tracking not good
-% Empatica only recorded for 2nd run
-% -------
-% SR007:
-% 56.5 cm
-% 17*2
-% 19*2
-% Geoscan not good
-% -------
-% SR011:
-% 55 cm
-% 16*2
-% 17*2
-% Geoscan interpolated around 10 electrodes, but looked good.
-% Empatica recording for longer than needed
-% ET not validated for first run
-

@@ -13,7 +13,7 @@ end
 address = hex2dec('BFF8');
 %-------------------------------------------------
 io64(ioObj,address,data_out); % send a signal
-pause(0.05)                   % change this setting based on task
+pause(0.01)                   % change this setting based on task
 flush    = 0;
 io64(ioObj,address,flush);    % flush
 

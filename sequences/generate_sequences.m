@@ -8,9 +8,10 @@ allstim_path   = fullfile(sourcedata, 'supp', 'allStimuli');
 stim_path      = fullfile(sourcedata, 'supp', 'stimuli');
 
 % Settings
-moveAvi        = false;
-createSequence = true;
-method         = 'pre-built'; % {'real-time', 'pre-built'};
+moveAvi         = false;
+createSequence  = true;
+method          = 'pre-built'; % {'real-time', 'pre-built'};
+filesForEachRun = 30; % Files for each run (half)
 
 % ------------------------------------------------------------------
 if moveAvi
@@ -67,8 +68,8 @@ if createSequence
 
     elseif strcmpi(method,'pre-built')
 
-    % Files for each run (half)
-    filesForEachRun = 30;
+    % Explicitly seed the random number generator
+    rng('shuffle');
 
     % Assign numbers to each file
     stimFilesCurated = dir(fullfile(stim_path, '*.avi'));
@@ -81,8 +82,9 @@ if createSequence
     
     % Randomize numbers
     randomOrder = randperm(numFiles);
-    sequenceFilesComplete = fileTable.FileName;
-    sequenceFilesComplete(randomOrder) = fileTable.FileName;
+    sequenceFilesComplete = fileTable.FileName(randomOrder);
+    % Save complete randomized sequence
+    save(strcat('sequences\','ranseq-',char(datetime, 'yyyyMMdd_HHmmss'),'.mat'), 'sequenceFilesComplete')
     % Save run 1 sequence
     sequenceFiles1 = sequenceFilesComplete(1:filesForEachRun);   
     cd(fullfile(scripts,'sequences'))

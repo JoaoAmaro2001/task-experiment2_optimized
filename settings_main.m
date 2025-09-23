@@ -1,5 +1,5 @@
 % Init pc-specific paths and variables
-setpath; cd(scripts);
+setpath(); cd(scripts);
 
 % Check version ('(R2018a)' or "R2024a")
 % ver_info = matlabRelease;
@@ -98,14 +98,14 @@ data.text.eventSequence     = ['sub-',data.input{1},'_task-', data.text.taskname
 % Task parameters
 data.task.numberOfRuns         = 2;
 data.task.stimsPerRun          = 30;
-data.task.eyes_closed_duration = 1; % in secs
-data.task.eyes_open_duration   = 1; % in secs
+data.task.eyes_closed_duration = 30; % in secs
+data.task.eyes_open_duration   = 30; % in secs
 data.task.preparation_duration = 5;  % in secs
 
 % select sequence to use
 if str2double(data.input{3}) == 1
     run = 1;
-    generate_sequences;  % Generate new stimuli sequence
+    generate_sequences();  % Generate new stimuli sequence
     sequence1 = load('sequences\sequence1.mat');
     % save information from chosen sequence in the 'data' structure
     data.sequences.files = sequence1.sequenceFiles1;
