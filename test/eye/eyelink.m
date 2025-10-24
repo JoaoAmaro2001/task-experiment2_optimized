@@ -34,8 +34,8 @@
 % -------------------------------------------------------------------------
 
 % % Make sure there is a connection via IT/CP (see tutorial at https://www.sr-research.com/support/thread-281.html)
-% ipadress = '100.1.1.2'; % check in cmd >>> ipconfig /all 
-% status   = Eyelink('SetAddress', ipadress); % Check connection
+ipadress = '10.10.10.70'; % check in cmd >>> ipconfig /all 
+status   = Eyelink('SetAddress', ipadress); % Check connection
 
 
 

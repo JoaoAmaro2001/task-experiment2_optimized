@@ -4,6 +4,34 @@ setpath(); cd(scripts);
 % Check version ('(R2018a)' or "R2024a")
 % ver_info = matlabRelease;
 
+% load the library
+lib = lsl_loadlib();
+
+% resolve a stream...
+disp('Resolving an EEG stream...');
+result = {};
+while isempty(result)
+    result = lsl_resolve_byprop(lib,'type','EEG'); end
+
+% Define stream info
+info = lsl_streaminfo(lib, 'PTB_Markers', 'Markers', 1, 0, 'cf_string', 'myuniquesourceid12345');
+
+% Create the outlet
+outlet = lsl_outlet(info);
+
+% create a stream info and outlet based on the stream info
+stream_name = 'MyMarkerStream';  % set the marker stream name according to your needs
+info = lsl_streaminfo(lib,stream_name,'Markers',1,0,'cf_string','myuniquesourceid23443');
+marker_outlet = lsl_outlet(info);
+
+% push a marker to the marker_outlet with the current LSL time
+marker_string = 'Marker101';  % set the marker string value according to your needs
+marker_outlet.push_sample({marker_string});
+
+
+% Testing
+% VBLSyncTest
+
 % Directories
 docs_path     = fullfile(scripts,'docs');
 allstim_path  = fullfile(sourcedata, 'supp', 'allStimuli');
@@ -17,6 +45,10 @@ data_path     = fullfile(sourcedata, 'data');
 output_screen = 2; % 1 for primary, 2 for secondary, ...
 screens       = Screen('Screens');
 screenNumber  = max(screens);
+
+%%
+% out = getScreenSettings(screenNumber)
+% %%
 
 if screenNumber > 0 % find out if there is more than one screen
     dual = get(0,'MonitorPositions');
@@ -158,3 +190,18 @@ W=rect(RectRight);                             % screen width
 H=rect(RectBottom);                            % screen height
 centerX = W / 2;                               % x center
 centerY = H / 2;                               % y center
+
+function settings = getScreenSettings(window)
+%GETSCREENSETTINGS Returns a structure with screen settings and some keys
+
+[screenXpixels, screenYpixels] = Screen('WindowSize', window);
+
+settings = struct('titleSize', 90, 'mainTextSize', 35, 'lowerTextSize', 25, 'trialTextSize', 100, ...
+    'lowerTextPosition', screenYpixels * 0.85, 'titlePosition', screenYpixels * 0.2, ...
+    'lowerRightPosition', screenXpixels * 0.8, 'lowerLeftPosition', screenXpixels * 0.05, ...
+    'titleLines', repmat('_', 1, 50), 'upperLinePosition', screenYpixels * 0.1, ...
+    'lowerLinePosition', screenYpixels * 0.23, ...
+    'backwardKey', KbName('q'), 'forwardKey', KbName('space'), 'responseKey', KbName('space'), ...
+    'backwardKeyText', 'Press "q" for previous page', 'forwardKeyText', 'Press Space to continue');
+
+end
