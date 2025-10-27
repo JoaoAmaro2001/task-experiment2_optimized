@@ -1,8 +1,36 @@
 % Init pc-specific paths and variables
 setpath(); cd(scripts);
 
-% Check version ('(R2018a)' or "R2024a")
-% ver_info = matlabRelease;
+data = struct();
+
+% % load the library
+% lib = lsl_loadlib();
+% 
+% % resolve a stream...
+% disp('Resolving an EEG stream...');
+% result = {};
+% while isempty(result)
+%     result = lsl_resolve_byprop(lib,'type','EEG'); end
+% 
+% % Define stream info
+% info = lsl_streaminfo(lib, 'PTB_Markers', 'Markers', 1, 0, 'cf_string', 'myuniquesourceid12345');
+% 
+% % Create the outlet
+% outlet = lsl_outlet(info);
+% 
+% % create a stream info and outlet based on the stream info
+% stream_name = 'MyMarkerStream';  % set the marker stream name according to your needs
+% info = lsl_streaminfo(lib,stream_name,'Markers',1,0,'cf_string','myuniquesourceid23443');
+% marker_outlet = lsl_outlet(info);
+% 
+% % push a marker to the marker_outlet with the current LSL time
+% marker_string = 'Marker101';  % set the marker string value according to your needs
+% marker_outlet.push_sample({marker_string});
+
+
+% % Testing
+% VBLSyncTest(630)
+% % save figures
 
 % Directories
 docs_path     = fullfile(scripts,'docs');
@@ -12,6 +40,22 @@ logs_path     = fullfile(sourcedata, 'supp', 'logfiles');
 event_path    = fullfile(sourcedata, 'supp', 'events');
 sequence_path = fullfile(sourcedata, 'supp', 'sequences');
 data_path     = fullfile(sourcedata, 'data');
+
+% Information
+data.info.matlab = matlabRelease();
+data.info.ptb.version = Screen('Version');
+data.info.ptb.machine = Screen('Computer');
+
+data.info.lsl = false;
+data.info.parallel_port = false;
+data.info.network.ipv4.general = '10.10.10.xxx';
+data.info.network.ipv4.eeg = '10.10.10.42';
+data.info.network.ipv4.eyetracker = '10.10.10.70';
+data.info.network.ipv4.machine = '10.10.10.31';
+data.info.network.subnet = '255.255.255.0';
+
+pntrs = Screen('Windows');
+% data.info.screen = Screen('GetWindowInfo', pntrs)
 
 %  SCREEN SETUP
 output_screen = 2; % 1 for primary, 2 for secondary, ...
@@ -32,7 +76,8 @@ clear output_screen screens resolution dual
 
 
 %% PARAMETERS - SETUP & INITIALISATION
-AssertOpenGL; % gives warning if running in PC with non-OpenGL based PTB
+
+AssertOpenGL(); % gives warning if running in PC with non-OpenGL based PTB
 
 % Formatting options
 data.format.fontSize         = 40;
@@ -134,7 +179,8 @@ exportXlsx = true;
 exportTsv  = true;
 
 % Initialise EEG -> Open NetStationAcquisition and start recording
-input('Press Enter if NetStation Acquisition is running and recording.');
+NetStation('Connect', data.info.network.ipv4.eeg)
+disp('Connection with NetStation successfull!');
 
 % -------------------------------------------------------------------------
 %                             SETUP SCREEN
@@ -143,8 +189,7 @@ backgroundColor = 255; % Background color: choose a number from 0 (black) to 255
 textColor = 0;         % Text color: choose a number from 0 (black) to 255 (white)
 clear screen
 Screen('Preference', 'SkipSyncTests', 0);   % Is this safe?
-Screen('Preference','VisualDebugLevel', 0); % Minimum amount of diagnostic output
-
+        
 % -------------------------------------------------------------------------
 %                       Initialise Eyelink +  Screen
 % -------------------------------------------------------------------------
@@ -154,7 +199,18 @@ edfFileName = [data.input{1} '_' data.input{3}]; % cannot have more than 8 chars
 % -------------------------------------------------------------------------
 %                             Get Screen Center
 % -------------------------------------------------------------------------
-W=rect(RectRight);                             % screen width
+W=  (RectRight);                             % screen width
 H=rect(RectBottom);                            % screen height
 centerX = W / 2;                               % x center
 centerY = H / 2;                               % y center
+
+
+% Using parallel port
+exists_mex = which("io64");
+if isempty(exists_mex)
+    error("Executable not found in the path. Ensure you downloaded it and added it to path.")
+end
+
+NetStation('Synchronize')
+
+

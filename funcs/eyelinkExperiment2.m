@@ -34,7 +34,7 @@ try
     
     % Optional: Set IP address of eyelink tracker computer to connect to.
     % Call this before initializing an EyeLink connection if you want to use a non-default IP address for the Host PC.
-    %Eyelink('SetAddress', '10.10.10.240');
+    % Eyelink('SetAddress', '10.10.10.70');
     
     EyelinkInit(dummymode); % Initialize EyeLink connection
     status = Eyelink('IsConnected');

@@ -5,8 +5,8 @@
 % -------------------------------------------------------------------------
 
 clear; close all; clc; % Clean workspace
-settings_main;         % Load all the settings from the file
-HideCursor;
+settings_main(); % Load all the settings from the file
+HideCursor();
 
 % -------------------------------------------------------------------------
 % IMPORTANT!!!!!!!!!!
@@ -58,6 +58,12 @@ eventTypes      = cell(1, numEvents);  % Type of event, e.g., 'DI99', 'DI98'
 eventValues     = zeros(1, numEvents); % Numeric value to encode the event, optional
 eventSamples    = zeros(1, numEvents); % Sample number at which event occurs, optional
 eventTime       = cell(1, numEvents);  % Universal time given by datetime('now')
+
+% -------------------------------------------------------------------------
+%                       Start EEG recording
+% -------------------------------------------------------------------------
+
+NetStation('StartRecording')
 
 % -------------------------------------------------------------------------
 %                       Start experiment
@@ -512,12 +518,27 @@ eventTypes{event_}  = 'DI10';  % Store the event type
 eventValues(event_) = 10;  % Store the event value
 eventSamples(event_)= round(eventOnsets(event_) * 500);  % Given 500 Hz sampling rate
 eventDurations(event_) = GetSecs - eventOnsets(event_);
-% ------------------------------------------------- Eyelink
-elFinish;
 
 % -------------------------------------------------------------------------
-%                          Convert Log File into TSV/XLSX
+%                       Stop EEG recording
 % -------------------------------------------------------------------------
+
+NetStation('StopRecording')
+NetStation('Disconnect')
+
+
+% -------------------------------------------------------------------------
+%                       Stop Eyetracker recording
+% -------------------------------------------------------------------------
+ 
+elFinish();
+
+% -------------------------------------------------------------------------
+%                          Export task data
+% -------------------------------------------------------------------------
+
+ShowCursor();
+
 addRunColumn = ones(n,1).*str2double(data.input{3});
 addSubColumn = repmat(data.input{1}, n, 1);% Add the run and subject columns to the log variables
 

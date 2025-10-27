@@ -1,7 +1,4 @@
-% When the computer has a parallel port, use this function
-% If Psychtoolbox needs to be used at the same time then:
-% NetStation('Connect', '10.10.10.42') -> IPV4 10.10.10.XX and same subnet as MAC
-% NetStation('Synchronize')
+% Use this function to send dat via parallel port
 
 function parallel_port(data_out)
 
@@ -13,9 +10,12 @@ end
 address = hex2dec('BFF8');
 %-------------------------------------------------
 io64(ioObj,address,data_out); % send a signal
-pause(0.01)                   % change this setting based on task
+% change this setting based on task
+% if sr=500Hz=2ms delta t, then the pause is double this value
+% pause(0.004)                  
 flush    = 0;
 io64(ioObj,address,flush);    % flush
+clear io64
 
 end
 
