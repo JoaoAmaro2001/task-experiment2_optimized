@@ -18,20 +18,27 @@ switch user
     bidsroot    = fullfile(root,'bids'); 
     results     = fullfile(root,'results');
     derivatives = fullfile(root,'derivatives'); 
+    addpath(genpath(scripts))
+    addpath('C:\toolbox\Psychtoolbox')
+    addpath('C:\toolbox\fieldtrip-20240722')
+    addpath('C:\toolbox\eeglab2024.2')
+
 
     case 'NGR_FMUL'          % VR-accelerated computer
     try
-    root        = 'Z:\Exp_2_optimized-video_rating'; % LAN
+    root        = 'Z:\Exp_2-optimized_video_rating'; % LAN
     cd(root); 
     cd(cdir);
     catch
-    root        = 'Z:\Exp_2_optimized-video_rating'; % Local
+    root        = 'Z:\Exp_2-optimized_video_rating'; % Local
     end
     scripts     = 'C:\github\JoaoAmaro2001\task-experiment2_optimized'; % specify path to scripts; 
     sourcedata  = fullfile(root,'sourcedata'); 
     bidsroot    = fullfile(root,'bids'); 
     results     = fullfile(root,'results');
     derivatives = fullfile(root,'derivatives'); 
+    addpath(genpath(scripts))    
+    addpath('C:\toolbox\Psychtoolbox')
     
     case 'joaop'          % Personal computer
     try
@@ -65,8 +72,3 @@ switch user
   otherwise
     error('The directories for the input and output data could not be found');
 end
-
-addpath(genpath(scripts))
-addpath('C:\toolbox\Psychtoolbox')
-addpath('C:\toolbox\fieldtrip-20240722')
-addpath('C:\toolbox\eeglab2024.2')

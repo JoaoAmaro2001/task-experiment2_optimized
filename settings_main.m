@@ -1,8 +1,7 @@
 % Init pc-specific paths and variables
 setpath(); cd(scripts);
 
-% Check version ('(R2018a)' or "R2024a")
-% ver_info = matlabRelease;
+data = struct();
 
 % % load the library
 % lib = lsl_loadlib();
@@ -29,8 +28,9 @@ setpath(); cd(scripts);
 % marker_outlet.push_sample({marker_string});
 
 
-% Testing
-% VBLSyncTest
+% % Testing
+% VBLSyncTest(630)
+% % save figures
 
 % Directories
 docs_path     = fullfile(scripts,'docs');
@@ -40,6 +40,22 @@ logs_path     = fullfile(sourcedata, 'supp', 'logfiles');
 event_path    = fullfile(sourcedata, 'supp', 'events');
 sequence_path = fullfile(sourcedata, 'supp', 'sequences');
 data_path     = fullfile(sourcedata, 'data');
+
+% Information
+data.info.matlab = matlabRelease();
+data.info.ptb.version = Screen('Version');
+data.info.ptb.machine = Screen('Computer');
+
+data.info.lsl = false;
+data.info.parallel_port = false;
+data.info.network.ipv4.general = '10.10.10.xxx';
+data.info.network.ipv4.eeg = '10.10.10.42';
+data.info.network.ipv4.eyetracker = '10.10.10.70';
+data.info.network.ipv4.machine = '10.10.10.31';
+data.info.network.subnet = '255.255.255.0';
+
+pntrs = Screen('Windows');
+% data.info.screen = Screen('GetWindowInfo', pntrs)
 
 %  SCREEN SETUP
 output_screen = 2; % 1 for primary, 2 for secondary, ...
@@ -64,7 +80,8 @@ clear output_screen screens resolution dual
 
 
 %% PARAMETERS - SETUP & INITIALISATION
-AssertOpenGL; % gives warning if running in PC with non-OpenGL based PTB
+
+AssertOpenGL(); % gives warning if running in PC with non-OpenGL based PTB
 
 % Formatting options
 data.format.fontSize         = 40;
@@ -88,13 +105,13 @@ keyM = KbName('m'); % 7
 % instructions definition
 data.text.taskname          = 'videorating';
 data.text.getready_en       = 'The experiment will start shortly... Keep your eyes fixed on the cross';
-data.text.getready_pt       = 'A experiência começará em breve... Mantenha o olhar fixo na cruz';
+data.text.getready_pt       = 'A experiï¿½ncia comeï¿½arï¿½ em breve... Mantenha o olhar fixo na cruz';
 data.text.starting_en       = 'Starting in';
-data.text.starting_pt       = 'Começa em';
+data.text.starting_pt       = 'Comeï¿½a em';
 data.text.baselineClosed_en = 'Baseline with eyes closed will start shortly';
-data.text.baselineClosed_pt = 'O período de relaxamento com olhos fechados começará em breve';
+data.text.baselineClosed_pt = 'O perï¿½odo de relaxamento com olhos fechados comeï¿½arï¿½ em breve';
 data.text.baselineOpen_en   = 'Baseline with eyes open will start shortly';
-data.text.baselineOpen_pt   = 'O período de relaxamento com olhos abertos começará em breve';
+data.text.baselineOpen_pt   = 'O perï¿½odo de relaxamento com olhos abertos comeï¿½arï¿½ em breve';
 
 % get rating image & size
 imX = 1920; imY = 1080; % image resolution 1920x1080
@@ -106,7 +123,7 @@ clear imX imY; % cleanup unused variables
 % user input - participant information
 % get user input for usage or not of eyelink
 prompt={'Introduza o ID do participante',...
-    'Linguagem da tarefa','Indique o número da sessão (run)'};
+    'Linguagem da tarefa','Indique o nï¿½mero da sessï¿½o (run)'};
 dlg_title='Input';
 % Fot this experiment participant_id will be SRxxx (scenario rating)
 data.input = inputdlg(prompt,dlg_title,1,{'SR','pt','1'});
@@ -166,7 +183,8 @@ exportXlsx = true;
 exportTsv  = true;
 
 % Initialise EEG -> Open NetStationAcquisition and start recording
-input('Press Enter if NetStation Acquisition is running and recording.');
+NetStation('Connect', data.info.network.ipv4.eeg)
+disp('Connection with NetStation successfull!');
 
 % -------------------------------------------------------------------------
 %                             SETUP SCREEN
@@ -175,8 +193,7 @@ backgroundColor = 255; % Background color: choose a number from 0 (black) to 255
 textColor = 0;         % Text color: choose a number from 0 (black) to 255 (white)
 clear screen
 Screen('Preference', 'SkipSyncTests', 0);   % Is this safe?
-Screen('Preference','VisualDebugLevel', 0); % Minimum amount of diagnostic output
-
+        
 % -------------------------------------------------------------------------
 %                       Initialise Eyelink +  Screen
 % -------------------------------------------------------------------------
@@ -186,22 +203,18 @@ edfFileName = [data.input{1} '_' data.input{3}]; % cannot have more than 8 chars
 % -------------------------------------------------------------------------
 %                             Get Screen Center
 % -------------------------------------------------------------------------
-W=rect(RectRight);                             % screen width
+W=  (RectRight);                             % screen width
 H=rect(RectBottom);                            % screen height
 centerX = W / 2;                               % x center
 centerY = H / 2;                               % y center
 
-function settings = getScreenSettings(window)
-%GETSCREENSETTINGS Returns a structure with screen settings and some keys
 
-[screenXpixels, screenYpixels] = Screen('WindowSize', window);
-
-settings = struct('titleSize', 90, 'mainTextSize', 35, 'lowerTextSize', 25, 'trialTextSize', 100, ...
-    'lowerTextPosition', screenYpixels * 0.85, 'titlePosition', screenYpixels * 0.2, ...
-    'lowerRightPosition', screenXpixels * 0.8, 'lowerLeftPosition', screenXpixels * 0.05, ...
-    'titleLines', repmat('_', 1, 50), 'upperLinePosition', screenYpixels * 0.1, ...
-    'lowerLinePosition', screenYpixels * 0.23, ...
-    'backwardKey', KbName('q'), 'forwardKey', KbName('space'), 'responseKey', KbName('space'), ...
-    'backwardKeyText', 'Press "q" for previous page', 'forwardKeyText', 'Press Space to continue');
-
+% Using parallel port
+exists_mex = which("io64");
+if isempty(exists_mex)
+    error("Executable not found in the path. Ensure you downloaded it and added it to path.")
 end
+
+NetStation('Synchronize')
+
+
