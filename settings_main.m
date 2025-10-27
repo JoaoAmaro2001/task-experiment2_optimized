@@ -4,29 +4,29 @@ setpath(); cd(scripts);
 % Check version ('(R2018a)' or "R2024a")
 % ver_info = matlabRelease;
 
-% load the library
-lib = lsl_loadlib();
-
-% resolve a stream...
-disp('Resolving an EEG stream...');
-result = {};
-while isempty(result)
-    result = lsl_resolve_byprop(lib,'type','EEG'); end
-
-% Define stream info
-info = lsl_streaminfo(lib, 'PTB_Markers', 'Markers', 1, 0, 'cf_string', 'myuniquesourceid12345');
-
-% Create the outlet
-outlet = lsl_outlet(info);
-
-% create a stream info and outlet based on the stream info
-stream_name = 'MyMarkerStream';  % set the marker stream name according to your needs
-info = lsl_streaminfo(lib,stream_name,'Markers',1,0,'cf_string','myuniquesourceid23443');
-marker_outlet = lsl_outlet(info);
-
-% push a marker to the marker_outlet with the current LSL time
-marker_string = 'Marker101';  % set the marker string value according to your needs
-marker_outlet.push_sample({marker_string});
+% % load the library
+% lib = lsl_loadlib();
+% 
+% % resolve a stream...
+% disp('Resolving an EEG stream...');
+% result = {};
+% while isempty(result)
+%     result = lsl_resolve_byprop(lib,'type','EEG'); end
+% 
+% % Define stream info
+% info = lsl_streaminfo(lib, 'PTB_Markers', 'Markers', 1, 0, 'cf_string', 'myuniquesourceid12345');
+% 
+% % Create the outlet
+% outlet = lsl_outlet(info);
+% 
+% % create a stream info and outlet based on the stream info
+% stream_name = 'MyMarkerStream';  % set the marker stream name according to your needs
+% info = lsl_streaminfo(lib,stream_name,'Markers',1,0,'cf_string','myuniquesourceid23443');
+% marker_outlet = lsl_outlet(info);
+% 
+% % push a marker to the marker_outlet with the current LSL time
+% marker_string = 'Marker101';  % set the marker string value according to your needs
+% marker_outlet.push_sample({marker_string});
 
 
 % Testing
