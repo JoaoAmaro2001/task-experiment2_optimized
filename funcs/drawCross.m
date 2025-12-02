@@ -1,6 +1,7 @@
-
-% Draw a fixation cross (overlapping horizontal and vertical bar)
 function drawCross(window,W,H)
+    % Draw a fixation cross (overlapping horizontal and vertical bar)
+    % Flip the screen after calling this function
+
     barLength = 160; % in pixels
     barWidth = 20; % in pixels
     barColor = 1; % number from 0 (black) to 1 (white) 

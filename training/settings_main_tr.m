@@ -20,8 +20,8 @@ if screenNumber > 0 % find out if there is more than one screen
 elseif screenNumber == 0 % if not, get the normal screen's resolution
     resolution = get(0,'ScreenSize');
 end
-data.format.resolx = resolution(3);
-data.format.resoly = resolution(4);
+cfg.format.resolx = resolution(3);
+cfg.format.resoly = resolution(4);
 
 % cleanup unused variables
 clear output_screen screens resolution dual
@@ -31,10 +31,10 @@ clear output_screen screens resolution dual
 AssertOpenGL; % gives warning if running in PC with non-OpenGL based PTB
 
 % Formatting options
-data.format.fontSize = 40;
-data.format.fontSizeFixation = 120;
-data.format.font = 'Arial';
-data.format.background_color = [255 255 255]; % grey 150!
+cfg.format.fontSize = 40;
+cfg.format.fontSizeFixation = 120;
+cfg.format.font = 'Arial';
+cfg.format.background_color = [255 255 255]; % grey 150!
 % initialise system for key query - changed 'UnifyKeyNames' to 'KeyNames' due to
 % the keyboard usage
 KbName('UnifyKeyNames')
@@ -50,20 +50,20 @@ keyN = KbName('n'); % 6
 keyM = KbName('m'); % 7
 
 % instructions definition
-data.text.taskname          = 'videorating';
-data.text.getready_en       = 'The experiment will start shortly... Keep your eyes fixed on the cross';
-data.text.getready_pt       = 'A experiência começará em breve... Mantenha o olhar fixo na cruz';
-data.text.starting_en       = 'Starting in';
-data.text.starting_pt       = 'Começa em';
-data.text.baselineClosed_en = 'Baseline with eyes closed will start shortly';
-data.text.baselineClosed_pt = 'O periodo de relaxamento com olhos fechados começará em breve';
-data.text.baselineOpen_en   = 'Baseline with eyes open will start shortly';
-data.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos abertos começará em breve';
+cfg.text.taskname          = 'videorating';
+cfg.text.getready_en       = 'The experiment will start shortly... Keep your eyes fixed on the cross';
+cfg.text.getready_pt       = 'A experiência começará em breve... Mantenha o olhar fixo na cruz';
+cfg.text.starting_en       = 'Starting in';
+cfg.text.starting_pt       = 'Começa em';
+cfg.text.baselineClosed_en = 'Baseline with eyes closed will start shortly';
+cfg.text.baselineClosed_pt = 'O periodo de relaxamento com olhos fechados começará em breve';
+cfg.text.baselineOpen_en   = 'Baseline with eyes open will start shortly';
+cfg.text.baselineOpen_pt   = 'O periodo de relaxamento com olhos abertos começará em breve';
 
 % get rating image & size
 imX = 1920; imY = 1080; % image resolution 1920x1080
-data.image.image_size = ...
-    [(data.format.resolx - imX)/2, (data.format.resoly - imY)/2,...
+cfg.image.image_size = ...
+    [(cfg.format.resolx - imX)/2, (cfg.format.resoly - imY)/2,...
     imX, imY];
 clear imX imY; % cleanup unused variables
 
@@ -73,22 +73,22 @@ prompt={'Introduza o ID do participante',...
     'Linguagem da tarefa','Indique o número da sessão (run)'};
 dlg_title='Input';
 % default: no ID, eyetracker in dummy mode, sequence 1, pupilometry
-data.input = inputdlg(prompt,dlg_title,1,{'SR','pt','1'});
+cfg.input = inputdlg(prompt,dlg_title,1,{'SR','pt','1'});
 % get time of experiment
 dateOfExp = datetime('now');
 
 % Task Language
-if strcmpi(data.input{2},'pt')
+if strcmpi(cfg.input{2},'pt')
     lanSuf = '_pt';
-elseif strcmpi(data.input{2},'en')
+elseif strcmpi(cfg.input{2},'en')
     lanSuf = '_en';
 end
 
 % Filenames
-data.text.elFileName        = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_eye'];
-data.text.logFileName       = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_log'];
-data.text.eegFileName       = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_eeg'];
-data.text.eventFileName     = ['sub-',data.input{1},'_task-', data.text.taskname,'_run-',data.input{3},'_event'];
+cfg.text.elFileName        = ['sub-',cfg.input{1},'_task-', cfg.text.taskname,'_run-',cfg.input{3},'_eye'];
+cfg.text.logFileName       = ['sub-',cfg.input{1},'_task-', cfg.text.taskname,'_run-',cfg.input{3},'_log'];
+cfg.text.eegFileName       = ['sub-',cfg.input{1},'_task-', cfg.text.taskname,'_run-',cfg.input{3},'_eeg'];
+cfg.text.eventFileName     = ['sub-',cfg.input{1},'_task-', cfg.text.taskname,'_run-',cfg.input{3},'_event'];
 
 % cleanup unused variables
 clear prompt dlg_title num_lines ppid scriptName ii
@@ -109,7 +109,7 @@ Screen('Preference','VisualDebugLevel', 0); % Minimum amount of diagnostic outpu
 % -------------------------------------------------------------------------
 %                       Initialise Eyelink +  Screen
 % -------------------------------------------------------------------------
-edfFileName = [data.input{1} '_' data.input{3}]; % cannot have more than 8 chars
+edfFileName = [cfg.input{1} '_' cfg.input{3}]; % cannot have more than 8 chars
 [window_1, rect, el] = eyelinkExperiment2(screenNumber, edfFileName, data);
 
 % -------------------------------------------------------------------------

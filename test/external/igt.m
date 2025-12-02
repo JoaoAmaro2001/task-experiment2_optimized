@@ -26,8 +26,8 @@ function igt
 %folder.  It is declared global so that all the other sub-routines can have
 %access to it, but you need to be sure to clear it out or you'll get the
 %previous subject's trial setup.
-clear global DATA;
-global DATA;
+clear global cfg;
+global cfg;
 
 %start off by calling the start_gui function.  Wait for user to input
 %things like subj name and demographics.
@@ -40,39 +40,39 @@ rand('state',sum(clock)); % set the random seed to a different state for each su
 % subwindowsize = [0 0 1340 800]; %use [] for no subwindow.
 % subwindowsize = [0 0 600 600];
 subwindowsize = [];
-DATA.blocks = 4;
-DATA.maxItr = 100; % usually 100;
-DATA.deckMax = 40; %usually 40
-DATA.startRun = 1;
-DATA.validResp = {'1!' '2@' '3#' '4$' 'esc' 'ESCAPE'};
-DATA.subject = handles.sub;
-DATA.age = handles.age;
-DATA.sex = handles.sex;
-DATA.handedness = handles.handedness;
-DATA.matFileName = ['Data/s' DATA.subject '/IGT_DATA.mat'];
-DATA.game_seq = zeros(3,DATA.maxItr);	% sequence of card selection
-DATA.rt = zeros(DATA.maxItr,6);
-DATA.debug = 0;
-DATA.RespFdbkDelay = .75;
-DATA.recordEeg = 0; %set to 0 if you're not plugged into the netstation.
+cfg.blocks = 4;
+cfg.maxItr = 100; % usually 100;
+cfg.deckMax = 40; %usually 40
+cfg.startRun = 1;
+cfg.validResp = {'1!' '2@' '3#' '4$' 'esc' 'ESCAPE'};
+cfg.subject = handles.sub;
+cfg.age = handles.age;
+cfg.sex = handles.sex;
+cfg.handedness = handles.handedness;
+cfg.matFileName = ['Data/s' cfg.subject '/IGT_cfg.mat'];
+cfg.game_seq = zeros(3,cfg.maxItr);	% sequence of card selection
+cfg.rt = zeros(cfg.maxItr,6);
+cfg.debug = 0;
+cfg.RespFdbkDelay = .75;
+cfg.recordEeg = 0; %set to 0 if you're not plugged into the netstation.
 
 %placeholder variables to keep track of things in the task
-DATA.cardTime     = zeros(DATA.maxItr, DATA.blocks);
-DATA.keyTime      = zeros(DATA.maxItr, DATA.blocks);
-DATA.fdbkTime     = zeros(DATA.maxItr, DATA.blocks);
-DATA.origSel      = zeros(DATA.maxItr, DATA.blocks);
-DATA.selectedDeck = zeros(DATA.maxItr, DATA.blocks);
-DATA.reward       = zeros(DATA.maxItr, DATA.blocks);
-DATA.punish       = zeros(DATA.maxItr, DATA.blocks);
+cfg.cardTime     = zeros(cfg.maxItr, cfg.blocks);
+cfg.keyTime      = zeros(cfg.maxItr, cfg.blocks);
+cfg.fdbkTime     = zeros(cfg.maxItr, cfg.blocks);
+cfg.origSel      = zeros(cfg.maxItr, cfg.blocks);
+cfg.selectedDeck = zeros(cfg.maxItr, cfg.blocks);
+cfg.reward       = zeros(cfg.maxItr, cfg.blocks);
+cfg.punish       = zeros(cfg.maxItr, cfg.blocks);
 
 
 %set escape key name for windows/mac
 % if strcmp(computer,'PCWIN')
-%     DATA.escape = 'esc';
+%     cfg.escape = 'esc';
 % else
-%     DATA.escape = 'ESCAPE';
+%     cfg.escape = 'ESCAPE';
 % end
-DATA.escape = 'ESCAPE';
+cfg.escape = 'ESCAPE';
 
 %check for the Data folder
 if ~exist('Data','dir')
@@ -81,18 +81,18 @@ if ~exist('Data','dir')
 end
 
 %if the subject already has a DATA structure, load it.
-if exist(DATA.matFileName,'file') && ~strcmp(DATA.subject,'99');
-    load(DATA.matFileName);
+if exist(cfg.matFileName,'file') && ~strcmp(cfg.subject,'99');
+    load(cfg.matFileName);
 end
 %if not, create the directory
-status = mkdir(['Data/12s' DATA.subject]);
+status = mkdir(['Data/12s' cfg.subject]);
 if status == 0; error(['problem creating subject directory: ' lasterr]); end;
 %create logfile
-DATA.fileName = ['Data/s' DATA.subject '/IGT_' datestr(now,'yyyymmddHHMMSS') '_s' DATA.subject '.txt'];
+cfg.fileName = ['Data/s' cfg.subject '/IGT_' datestr(now,'yyyymmddHHMMSS') '_s' cfg.subject '.txt'];
 
 %open the text log file
-if exist(DATA.fileName, 'file') == 0
-    fid = fopen(DATA.fileName, 'a');
+if exist(cfg.fileName, 'file') == 0
+    fid = fopen(cfg.fileName, 'a');
     fprintf(fid, '%s \n\r', 'Iowa Gambling Task: EEG version');
     fclose(fid);
 end
@@ -111,20 +111,20 @@ try
     %be sure you're using the right screen
     screenid = max(Screen('Screens'));
     % Open window, with or without imaging pipeline:
-    DATA.win = Screen('OpenWindow', screenid, 255, subwindowsize);
-    Screen('TextFont', DATA.win, char('Helvetica'));
-    Screen('TextStyle', DATA.win, 1);
-    Screen('TextSize', DATA.win, 30);
+    cfg.win = Screen('OpenWindow', screenid, 255, subwindowsize);
+    Screen('TextFont', cfg.win, char('Helvetica'));
+    Screen('TextStyle', cfg.win, 1);
+    Screen('TextSize', cfg.win, 30);
     %ListenChar(2);
 
     %put something on the screen
-    DrawFormattedText(DATA.win, 'Please wait...', 'center', 'center');
-    Screen('Flip', DATA.win);
+    DrawFormattedText(cfg.win, 'Please wait...', 'center', 'center');
+    Screen('Flip', cfg.win);
 
     %---pre-load the stimuli for speed-----------------------------------------
-    [DATA.width, DATA.height] = Screen('WindowSize', DATA.win);
-    cardWidth = DATA.width / 5;
-    cardHeight = DATA.height / 3;
+    [cfg.width, cfg.height] = Screen('WindowSize', cfg.win);
+    cardWidth = cfg.width / 5;
+    cardHeight = cfg.height / 3;
     posX = cardWidth / 5;		% || s |c| s |c| s |c| s |c| s ||	there are 5 space in horizon
     posY = cardHeight / 6;
 
@@ -140,15 +140,15 @@ try
 
     imgBlank = imread('./images/blank.jpeg', 'JPG');
 
-    textA = Screen('MakeTexture', DATA.win, double(imgA));
-    textB = Screen('MakeTexture', DATA.win, double(imgB));
-    textC = Screen('MakeTexture', DATA.win, double(imgC));
-    textD = Screen('MakeTexture', DATA.win, double(imgD));
-    textASel = Screen('MakeTexture', DATA.win, double(imgASel));
-    textBSel = Screen('MakeTexture', DATA.win, double(imgBSel));
-    textCSel = Screen('MakeTexture', DATA.win, double(imgCSel));
-    textDSel = Screen('MakeTexture', DATA.win, double(imgDSel));
-    textBlank = Screen('MakeTexture', DATA.win, double(imgBlank));
+    textA = Screen('MakeTexture', cfg.win, double(imgA));
+    textB = Screen('MakeTexture', cfg.win, double(imgB));
+    textC = Screen('MakeTexture', cfg.win, double(imgC));
+    textD = Screen('MakeTexture', cfg.win, double(imgD));
+    textASel = Screen('MakeTexture', cfg.win, double(imgASel));
+    textBSel = Screen('MakeTexture', cfg.win, double(imgBSel));
+    textCSel = Screen('MakeTexture', cfg.win, double(imgCSel));
+    textDSel = Screen('MakeTexture', cfg.win, double(imgDSel));
+    textBlank = Screen('MakeTexture', cfg.win, double(imgBlank));
 
     deckA = [posX, posY, posX + cardWidth, posY + cardHeight];
     deckB = deckA + [posX + cardWidth, 0, posX + cardWidth, 0];
@@ -158,23 +158,23 @@ try
 
 
     %---Start up the NetStation session----------------------------------------
-    if DATA.recordEeg
+    if cfg.recordEeg
         [status, errMsg] = NetStation('Connect', '10.5.72.232');
-        if status && ~DATA.debug;
+        if status && ~cfg.debug;
             display(['Problem connecting to NetStation: ' errMsg]);
             quitExp;
         end
         
         %Sync NetStation and PsychToolbox times
         [status, errMsg] = NetStation('Synchronize');
-        if status && ~DATA.debug;
+        if status && ~cfg.debug;
             display(['Problem syncing time with NetStation: ' errMsg]);
             quitExp;
         end
         
         %Start recording.
         [status, errMsg] = NetStation('StartRecording');
-        if status && ~DATA.debug;
+        if status && ~cfg.debug;
             display(['Problem starting NetStation recording: ' errMsg]);
             quitExp;
         end
@@ -187,14 +187,14 @@ try
     acc_punish = 0;
 
     %loop over the number of blocks
-    for block = 1:DATA.blocks
+    for block = 1:cfg.blocks
         
         textures = {textA textB textC textD};
         selecteds = {textASel textBSel textCSel textDSel};
         locations = {deckA' deckB' deckC' deckD'};
 
         %setup decks for this block
-        decks = penalty_dist(DATA.deckMax);	% 40 card in each deck
+        decks = penalty_dist(cfg.deckMax);	% 40 card in each deck
 
         % shuffle decks
         shuffleDecks = randperm(4);
@@ -202,41 +202,41 @@ try
         %log:
         %deck assignment
         %Columns are: itr, cardTime, keyTime, fdbkTime, origSel, selectedDeck, reward, punish
-        fid = fopen(DATA.fileName, 'a');
+        fid = fopen(cfg.fileName, 'a');
         fprintf(fid, '%s \n\r', num2str(shuffleDecks));
         fprintf(fid, '%s \n\r', 'itr, cardTime, keyTime, fdbkTime, origSel, selectedDeck, reward, punish');
         fclose(fid);
 
         %Ready to go!
-        DrawFormattedText(DATA.win, 'Press SPACE to begin.', 'center', 'center');
-        Screen('Flip', DATA.win);
+        DrawFormattedText(cfg.win, 'Press SPACE to begin.', 'center', 'center');
+        Screen('Flip', cfg.win);
         while KbCheck; end;
         KbWait;
 
         %%%Main Trial Loop%%%
         itr = 1;
-        while itr <= DATA.maxItr  % iteration of card selection by subject
+        while itr <= cfg.maxItr  % iteration of card selection by subject
 
             %Generate deck stimuli
-            %showDecks(DATA.win, decks, shuffleDecks);
+            %showDecks(cfg.win, decks, shuffleDecks);
             for deck = 1:4
-                if decks.index(1,shuffleDecks(deck)) > DATA.deckMax
+                if decks.index(1,shuffleDecks(deck)) > cfg.deckMax
                     textures{deck} = textBlank;
                 end
-                Screen('DrawTextures', DATA.win, textures{deck}, [], locations{deck});
+                Screen('DrawTextures', cfg.win, textures{deck}, [], locations{deck});
             end
 
             %put a fixation cross on the screen
-            DrawFormattedText(DATA.win,'+','center','center');
+            DrawFormattedText(cfg.win,'+','center','center');
 
             %Flip the deck stimuli to the screen
-            [cardTime] = Screen(DATA.win, 'Flip');
+            [cardTime] = Screen(cfg.win, 'Flip');
 
             %Send an event signal to NetSTation
             %[status, errMsg] = NetStation('Event', 'STIM', cardTime, [], 'tria', itr);
-            if DATA.recordEeg
+            if cfg.recordEeg
                 [status, errMsg] = NetStation('Event', 'STIM', cardTime);
-                if status && ~DATA.debug;
+                if status && ~cfg.debug;
                     display(['Problem recording event: ' errMsg]);
                     quitExp;
                     return
@@ -248,8 +248,8 @@ try
                 FlushEvents;
                 [keyIsDown, keyTime, keyCode] = KbCheck;
                 thisKey = KbName(keyCode);
-                if strcmp(thisKey, DATA.escape); quitExp; return; end
-                if keyIsDown == 1 %&& any(strcmp(DATA.validResp,thisKey(1)))
+                if strcmp(thisKey, cfg.escape); quitExp; return; end
+                if keyIsDown == 1 %&& any(strcmp(cfg.validResp,thisKey(1)))
                     %wait for them to release the key and move on
                     while KbCheck; end
                     break
@@ -272,14 +272,14 @@ try
                 %will be different for "safe" vs. "risky" decks. The code
                 %is SAFE for "safe" decks (C and D) and RISK for "risky"
                 %decks (A and B).
-                if DATA.recordEeg
+                if cfg.recordEeg
                     switch selectedDeck
                         case {1,2}; respCode = 'RISK';
                         case {3,4}; respCode = 'SAFE';
                         otherwise; respCode = 'RESP';
                     end
                     [status, errMsg] = NetStation('Event', respCode, keyTime);
-                    if status && ~DATA.debug;
+                    if status && ~cfg.debug;
                         display(['Problem recording event: ' errMsg]);
                         quitExp;
                         return
@@ -288,30 +288,30 @@ try
 
                 % draw cards again to indicate selection
                 for deck = 1:4
-                    if decks.index(1,shuffleDecks(deck)) > DATA.deckMax
+                    if decks.index(1,shuffleDecks(deck)) > cfg.deckMax
                         textures{deck} = textBlank;
                     end
-                    Screen('DrawTextures', DATA.win, textures{deck}, [], locations{deck});
+                    Screen('DrawTextures', cfg.win, textures{deck}, [], locations{deck});
                 end
-                %mark_selectedDeck(DATA.win, orig_sel);
-                Screen('DrawTextures', DATA.win, selecteds{origSel}, [], locations{origSel});
+                %mark_selectedDeck(cfg.win, orig_sel);
+                Screen('DrawTextures', cfg.win, selecteds{origSel}, [], locations{origSel});
                 %put a fixation cross on the screen
-                DrawFormattedText(DATA.win,'+','center','center');
+                DrawFormattedText(cfg.win,'+','center','center');
 
                 %Flip the deck stimuli to the screen
-                [selectTime] = Screen(DATA.win, 'Flip');
+                [selectTime] = Screen(cfg.win, 'Flip');
 
                 %Send an event signal to NetSTation
-                if DATA.recordEeg
+                if cfg.recordEeg
                     [status, errMsg] = NetStation('Event', 'SELT', selectTime);
-                    if status && ~DATA.debug;
+                    if status && ~cfg.debug;
                         display(['Problem recording event: ' errMsg]);
                         quitExp;
                         return
                     end
                 end
 
-                if (decks.index(1,selectedDeck) <= DATA.deckMax)
+                if (decks.index(1,selectedDeck) <= cfg.deckMax)
 
                     %calculate feedback
                     reward = decks.reward(selectedDeck ,decks.index(1, selectedDeck));
@@ -319,7 +319,7 @@ try
                     decks.index(1, selectedDeck) = decks.index(1, selectedDeck) + 1;
 
                     %display feedback
-                    %show_msg(DATA.win, current_reward, punish, orig_sel);
+                    %show_msg(cfg.win, current_reward, punish, orig_sel);
                     if punish == 0
                         msg = ['You won: ' num2str(reward) ];
                     else
@@ -328,23 +328,23 @@ try
                     end
                     %draw cards again
                     for deck = 1:4
-                        if decks.index(1,shuffleDecks(deck)) > DATA.deckMax
+                        if decks.index(1,shuffleDecks(deck)) > cfg.deckMax
                             textures{deck} = textBlank;
                         end
-                        Screen('DrawTextures', DATA.win, textures{deck}, [], locations{deck});
+                        Screen('DrawTextures', cfg.win, textures{deck}, [], locations{deck});
                     end
                     %put the message in
-                    DrawFormattedText(DATA.win,msg,'center','center');
-                    %mark_selectedDeck(DATA.win, orig_sel);
-                    Screen('DrawTextures', DATA.win, selecteds{origSel}, [], locations{origSel});
+                    DrawFormattedText(cfg.win,msg,'center','center');
+                    %mark_selectedDeck(cfg.win, orig_sel);
+                    Screen('DrawTextures', cfg.win, selecteds{origSel}, [], locations{origSel});
 
                     %wait a pre-specified time between button press and
                     %feedback
-                    while GetSecs < selectTime + DATA.RespFdbkDelay
+                    while GetSecs < selectTime + cfg.RespFdbkDelay
                     end
                         
                     %Flip the deck stimuli to the screen
-                    [fdbkTime] = Screen(DATA.win, 'Flip');
+                    [fdbkTime] = Screen(cfg.win, 'Flip');
 
                     %calculate the outcome code
                     % Each place is a deck (1000 = A, 0100 = B, 0010 = C,
@@ -369,9 +369,9 @@ try
                     feedbackCode(selectedDeck) = code;
                     
                     %Send an event signal to NetSTation
-                    if DATA.recordEeg
+                    if cfg.recordEeg
                         [status, errMsg] = NetStation('Event', feedbackCode, fdbkTime);
-                        if status && ~DATA.debug;
+                        if status && ~cfg.debug;
                             display(['Problem recording event: ' errMsg]);
                             quitExp;
                             return
@@ -379,23 +379,23 @@ try
                     end
                     
                     %log the data for this trial
-                    fid = fopen(DATA.fileName, 'a');
+                    fid = fopen(cfg.fileName, 'a');
                     fprintf(fid, '%d, %f, %f, %f, %d, %d, %d, %d\n\r', itr, cardTime, keyTime, fdbkTime, origSel, selectedDeck, reward, punish);
                     fclose(fid);
 
 
                     %leave the feedback up for 1.25 seconds
                     while GetSecs < 1.25 + fdbkTime; end;
-                    %Screen(DATA.win, 'Flip');
+                    %Screen(cfg.win, 'Flip');
 
                     %record responses, sequence
-                    DATA.cardTime(itr,block)     = cardTime;
-                    DATA.keyTime(itr,block)      = keyTime;
-                    DATA.fdbkTime(itr,block)     = fdbkTime;
-                    DATA.origSel(itr,block)      = origSel;
-                    DATA.selectedDeck(itr,block) = selectedDeck;
-                    DATA.reward(itr,block)       = reward;
-                    DATA.punish(itr,block)       = punish;
+                    cfg.cardTime(itr,block)     = cardTime;
+                    cfg.keyTime(itr,block)      = keyTime;
+                    cfg.fdbkTime(itr,block)     = fdbkTime;
+                    cfg.origSel(itr,block)      = origSel;
+                    cfg.selectedDeck(itr,block) = selectedDeck;
+                    cfg.reward(itr,block)       = reward;
+                    cfg.punish(itr,block)       = punish;
 
                     %increment the itr counter
                     itr = itr + 1;
@@ -405,18 +405,18 @@ try
                     acc_punish = acc_punish + punish;
                 end
             end
-        end %while itr <= DATA.maxItr
+        end %while itr <= cfg.maxItr
 
         %reset the decks variable.
         clear decks;
         %clear the display
-        %Screen(DATA.win, 'Flip');
+        %Screen(cfg.win, 'Flip');
 
         %give some feedback:
-        DrawFormattedText(DATA.win, ['End of block. \n\n Total gained: ' ...
+        DrawFormattedText(cfg.win, ['End of block. \n\n Total gained: ' ...
             num2str(acc_reward) '\n Total lost: ' num2str(acc_punish)], ...
             'center','center');
-        [t] = Screen(DATA.win, 'Flip');
+        [t] = Screen(cfg.win, 'Flip');
         
         %wait 5 seconds while the totals are on the screen
         while GetSecs < t + 5; end
@@ -424,13 +424,13 @@ try
         %KbWait;
 
 
-    end %for block = 1:DATA.blocks
+    end %for block = 1:cfg.blocks
 
-    DrawFormattedText(DATA.win, ['Your total score: \n\n' ...
+    DrawFormattedText(cfg.win, ['Your total score: \n\n' ...
         'Total gained: ' num2str(acc_reward) ...
         '\n Total lost: ' num2str(acc_punish)], ...
         'center','center');
-    Screen(DATA.win,'Flip');
+    Screen(cfg.win,'Flip');
     while KbCheck; end
     KbWait;
     
@@ -453,9 +453,9 @@ function quitExp
 
 global DATA
 
-save(DATA.matFileName,'DATA');
+save(cfg.matFileName,'DATA');
 
-Screen('Flip', DATA.win);
+Screen('Flip', cfg.win);
 
 %stop NetStation recording
 NetStation('StopRecording');
@@ -463,8 +463,8 @@ NetStation('StopRecording');
 %disconnect NetStation
 NetStation('Disconnect');
 
-DrawFormattedText(DATA.win, 'Thank you!', 'center', 'center',[0,0,0,255]);
-Screen('Flip',DATA.win);
+DrawFormattedText(cfg.win, 'Thank you!', 'center', 'center',[0,0,0,255]);
+Screen('Flip',cfg.win);
 while KbCheck; end;
 KbWait;
 

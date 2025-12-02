@@ -79,7 +79,7 @@ while trial_ <= n
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
                 Screen('TextFont', window_1, 'Arial');
-                message = sprintf(strcat(eval(strcat('data.text.starting', lanSuf)),' %d'), i);
+                message = sprintf(strcat(eval(strcat('cfg.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
                 WaitSecs(1);
@@ -99,14 +99,14 @@ while trial_ <= n
             % You need to give clear instructions for when the subject
             % needs to open their eyes again
             Screen('TextSize', window_1, 50);
-            DrawFormattedText(window_1, eval(strcat('data.text.baselineClosed', lanSuf)), 'center', 'center', textColor);
+            DrawFormattedText(window_1, eval(strcat('cfg.text.baselineClosed', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             WaitSecs(5);
             countdown_from = 5; % Start countdown from 10
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
                 Screen('TextFont', window_1, 'Arial');
-                message = sprintf(strcat( eval(strcat('data.text.starting', lanSuf)),' %d'), i);
+                message = sprintf(strcat( eval(strcat('cfg.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
                 WaitSecs(1);
@@ -135,14 +135,14 @@ while trial_ <= n
 % -------------------------------------------------------------------------
         case 97
             Screen('TextSize', window_1, 50);
-            DrawFormattedText(window_1, eval(strcat('data.text.baselineOpen', lanSuf)), 'center', 'center', textColor);
+            DrawFormattedText(window_1, eval(strcat('cfg.text.baselineOpen', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             WaitSecs(5);
             countdown_from = 5; % Start countdown from 10
             for i = countdown_from:-1:1
                 Screen('TextSize', window_1, 60);
                 Screen('TextFont', window_1, 'Arial');
-                message = sprintf(strcat( eval(strcat('data.text.starting', lanSuf)),' %d'), i);
+                message = sprintf(strcat( eval(strcat('cfg.text.starting', lanSuf)),' %d'), i);
                 DrawFormattedText(window_1, message, 'center', 'center', textColor);
                 Screen('Flip', window_1);
                 WaitSecs(1);
@@ -170,7 +170,7 @@ while trial_ <= n
 % -------------------------------------------------------------------------
         case 1
             Screen('TextSize', window_1, 50);
-            DrawFormattedText(window_1, eval(strcat('data.text.getready', lanSuf)), 'center', 'center', textColor);
+            DrawFormattedText(window_1, eval(strcat('cfg.text.getready', lanSuf)), 'center', 'center', textColor);
             InitialDisplayTime = Screen('Flip', window_1);
             % ------------------------------------------- EEG
             parallel_port(1);   % Send to NetStation
@@ -193,7 +193,7 @@ while trial_ <= n
 % -------------------------------------------------------------------------
         case 2
             Eyelink('command','draw_cross %d %d',...
-            data.format.resolx/2,data.format.resoly/2);
+            cfg.format.resolx/2,cfg.format.resoly/2);
             Eyelink('Message','Fixation Cross');
             % -----------------------------------------
             drawCross(window_1, W, H);
@@ -474,15 +474,15 @@ elFinish;
 % -------------------------------------------------------------------------
 %                          Convert Log File into TSV/XLSX
 % -------------------------------------------------------------------------
-addRunColumn = ones(n,1).*str2double(data.input{3});
-addSubColumn = repmat(data.input{1}, n, 1);% Add the run and subject columns to the log variables
+addRunColumn = ones(n,1).*str2double(cfg.input{3});
+addSubColumn = repmat(cfg.input{1}, n, 1);% Add the run and subject columns to the log variables
 
 if exportXlsx
     % Assuming logOnsets, logDurations, logTypes, logValues, logSamples are your log variables
     logTable = table(addSubColumn, addRunColumn, choiceValence', rt_valence', choiceArousal', rt_arousal',...
         'VariableNames', {'sub', 'run', 'valence', 'rt_valence', 'arousal', 'rt_arousal'});
     % Write the log table to an XLSX file
-    writetable(logTable, [logs_path filesep data.text.logFileName '.xlsx']);
+    writetable(logTable, [logs_path filesep cfg.text.logFileName '.xlsx']);
 end
 
 if exportTsv
@@ -490,7 +490,7 @@ if exportTsv
     logTable = table(logOnsets', logDurations', logTypes', logValues', logSamples', ...
         'VariableNames', {'onset', 'duration', 'type', 'value', 'sample'});
     % Write the log table to a TSV file
-    writetable(logTable, [logs_path filesep data.text.logFileName '.tsv'], 'FileType', 'text', 'Delimiter', '\t');
+    writetable(logTable, [logs_path filesep cfg.text.logFileName '.tsv'], 'FileType', 'text', 'Delimiter', '\t');
 end
 
 % -------------------------------------------------------------------------
@@ -502,7 +502,7 @@ if exportXlsx
 eventTable = table(eventOnsets', eventDurations', eventTypes', eventValues', eventSamples', ...
     'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample'});
 % Write the table to an XLSX file
-writetable(eventTable, [event_path filesep data.text.eventFileName '.xlsx']);
+writetable(eventTable, [event_path filesep cfg.text.eventFileName '.xlsx']);
 end
 
 if exportTsv
@@ -510,5 +510,5 @@ if exportTsv
 eventTable = table(eventOnsets', eventDurations', eventTypes', eventValues', eventSamples', ...
     'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample'});
 % Write the table to a TSV file
-writetable(eventTable, [event_path filesep data.text.eventFileName '.tsv'], 'FileType', 'text', 'Delimiter', 'tab');
+writetable(eventTable, [event_path filesep cfg.text.eventFileName '.tsv'], 'FileType', 'text', 'Delimiter', 'tab');
 end

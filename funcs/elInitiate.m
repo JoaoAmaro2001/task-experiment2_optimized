@@ -1,14 +1,14 @@
-function [window, rect, el] = eyelinkExperiment2(screenNumber, edfFile, data)
+function [window, rect, el] = elInitiate(cfg, edfFile)
 % A simple EyeLink integration demo that records eye movements passively 
 % while an image is presented on the screen. Each trial ends when the
 % space bar or a button is pressed.
 %
 % Usage:
-% Eyelink_SimplePicture(screenNumber)
+% Eyelink_SimplePicture(cfg.screen.number)
 %
-% screenNumber is an optional parameter which can be used to pass a specific value to Screen('OpenWindow', ...)
-% If screenNumber is not specified, or if isempty(screenNumber) then the default:
-% screenNumber = max(Screen('Screens'));
+% cfg.screen.number is an optional parameter which can be used to pass a specific value to Screen('OpenWindow', ...)
+% If cfg.screen.number is not specified, or if isempty(cfg.screen.number) then the default:
+% cfg.screen.number = max(Screen('Screens'));
 % will be used.
 
 % persistent el
@@ -19,9 +19,9 @@ if ~IsOctave; commandwindow; end
 % Initialize PsychSound for calibration/validation audio feedback
 InitializePsychSound();
 
-% Use default screenNumber if none specified
+% Use default cfg.screen.number if none specified
 if (nargin < 1)
-    screenNumber = [];
+    cfg.screen.number = [];
 elseif (nargin < 2)
     edfFile = [];
 end
@@ -34,7 +34,6 @@ try
     
     % Optional: Set IP address of eyelink tracker computer to connect to.
     % Call this before initializing an EyeLink connection if you want to use a non-default IP address for the Host PC.
-    % Eyelink('SetAddress', '10.10.10.70');
     
     EyelinkInit(dummymode); % Initialize EyeLink connection
     status = Eyelink('IsConnected');
@@ -42,7 +41,7 @@ try
         dummymode = 1; 
     end
        
-    % Check if data.text.elFileName exists and is not empty
+    % Check if cfg.text.elFileName exists and is not empty
     if isempty(edfFile) % If no file name is provided
         % Open dialog box for EyeLink Data file name entry. File name up to 8 characters
         prompt = {'Enter EDF file name (up to 8 characters)'};
@@ -108,12 +107,9 @@ try
     %% STEP 3: OPEN GRAPHICS WINDOW
     
     % Open experiment graphics on the specified screen
-    if isempty(screenNumber)
-        screenNumber = max(Screen('Screens')); % Use default screen if none specified
-    end
-    [window, rect] = Screen('Openwindow',screenNumber,data.format.background_color,[],[],2);
-    Screen('TextSize', window,data.format.fontSize);
-    Screen('TextFont', window,data.format.font);
+    [window, rect] = Screen('Openwindow',cfg.screen.number,cfg.format.backgroundColor,[],[],2);
+    Screen('TextSize', window,cfg.format.fontSizeText);
+    Screen('TextFont', window,cfg.format.font);
     Screen('TextStyle', window, 1);
     Screen('Flip', window);
     % Return width and height of the graphics window/screen in pixels
@@ -129,7 +125,7 @@ try
     % set calibration/validation/drift-check(or drift-correct) size as well as background and target colors. 
     % It is important that this background colour is similar to that of the stimuli to prevent large luminance-based 
     % pupil size changes (which can cause a drift in the eye movement data)
-    el.calibrationtargetsize = 3;% Outer target size as percentage of the screen
+    el.calibrationtargetsize = 3; % Outer target size as percentage of the screen
     el.calibrationtargetwidth = 0.7;% Inner target size as percentage of the screen
     el.backgroundcolour = [255 255 255];% RGB white
     el.calibrationtargetcolour = [0 0 0];% RGB black
@@ -158,7 +154,7 @@ try
     % Allow a supported EyeLink Host PC button box to accept calibration or drift-check/correction targets via button 5
     Eyelink('Command', 'button_function 5 "accept_target_fixation"');
     % % Hide mouse cursor
-    % if dummymode==0; HideCursor(screenNumber); end
+    % if dummymode==0; HideCursor(cfg.screen.number); end
     % Start listening for keyboard input. Suppress keypresses to Matlab windows.
     ListenChar(-1);
     Eyelink('Command', 'clear_screen 0'); % Clear Host PC display from any previus drawing

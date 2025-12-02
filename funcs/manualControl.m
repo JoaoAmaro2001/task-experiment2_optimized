@@ -2,7 +2,7 @@
 [keyIsDown, ~, keyCode] = KbCheck; % Check for keyboard press
 if keyIsDown
     if keyCode(keyESCAPE) % Check if the terminate key was pressed
-        elFinish;
+        elFinish(cfg);
         error('Forced exit') % Exit the function or script
     end
 end

@@ -121,8 +121,8 @@ if screenNumber > 0 % find out if there is more than one screen
 elseif screenNumber == 0 % if not, get the normal screen's resolution
     resolution = get(0,'ScreenSize');
 end
-data.format.resolx = resolution(3);
-data.format.resoly = resolution(4);
+cfg.format.resolx = resolution(3);
+cfg.format.resoly = resolution(4);
 
 % cleanup unused variables
 clear output_screen screens resolution dual
@@ -145,10 +145,10 @@ cd(pathz) % go to path where task is running
 InitializePsychSound(1); phndl = PsychPortAudio('Open',[],[],0,44100,1);
 
 % Formatting options
-data.format.fontSize = 40;
-data.format.fontSizeFixation = 120;
-data.format.font = 'Arial';
-data.format.background_color = [150 150 150]; % grey 150!
+cfg.format.fontSize = 40;
+cfg.format.fontSizeFixation = 120;
+cfg.format.font = 'Arial';
+cfg.format.background_color = [150 150 150]; % grey 150!
 % initialise system for key query - changed 'UnifyKeyNames' to 'KeyNames' due to
 % the keyboard usage
 KbName('KeyNames');
@@ -162,24 +162,24 @@ keyN = KbName('n'); % 6
 keyM = KbName('m'); % 7
 
 % instructions definition
-data.text.getready = 'Quando estiver pronto pressione a tecla SPACE.';
-data.text.instructions_p1 = ['Nesta tarefa irá ouvir sons. \n\n',...
-    'Será pedido que faça diferentes julgamentos \n',...
+cfg.text.getready = 'Quando estiver pronto pressione a tecla SPACE.';
+cfg.text.instructions_p1 = ['Nesta tarefa irï¿½ ouvir sons. \n\n',...
+    'Serï¿½ pedido que faï¿½a diferentes julgamentos \n',...
     'acerca da autenticidade de sons emocionais, \n',...
     'enquanto em sons neutros pedimos apenas que \n',...
-    'preste atenção. \n\n',...
-    'A autenticidade é definida como a propriedade de \n',...
-    'genuinidade de uma emoção, podendo ser classificada \n',...
-    'como genuína (autêntica) ou forçada (não autêntica).\n\n',...
+    'preste atenï¿½ï¿½o. \n\n',...
+    'A autenticidade ï¿½ definida como a propriedade de \n',...
+    'genuinidade de uma emoï¿½ï¿½o, podendo ser classificada \n',...
+    'como genuï¿½na (autï¿½ntica) ou forï¿½ada (nï¿½o autï¿½ntica).\n\n',...
     'Por favor, responda apenas no fim de cada som, \n',...
-    'e efetue a resposta com base na sua primeira impressão.\n\n',...
-    'Pressione a tecla SPACE para começar.'];
+    'e efetue a resposta com base na sua primeira impressï¿½o.\n\n',...
+    'Pressione a tecla SPACE para comeï¿½ar.'];
 
 % get rating image & size
-data.image.ima = imread('aut1_full.jpg');
+cfg.image.ima = imread('aut1_full.jpg');
 imX = 1920; imY = 1080; % image resolution 1920x1080
-data.image.image_size = ...
-    [(data.format.resolx - imX)/2, (data.format.resoly - imY)/2,...
+cfg.image.image_size = ...
+    [(cfg.format.resolx - imX)/2, (cfg.format.resoly - imY)/2,...
     imX, imY];
 clear imX imY; % cleanup unused variables
 
@@ -190,46 +190,46 @@ prompt={'Introduza o ID do participante',...
     'Escolha a sequencia pretendida (1 - 4)'};
 dlg_title='Input';
 % default: no ID, eyetracker in dummy mode, sequence 1, pupilometry
-data.input = inputdlg(prompt,dlg_title,1,{'...','1','1'});
+cfg.input = inputdlg(prompt,dlg_title,1,{'...','1','1'});
 % get time of experiment
 clock_var = clock; clock_var = [num2str(clock_var(4)),'_',...
     num2str(clock_var(5)),'_',num2str(round(clock_var(6)))];
 % name for log file
-ppid = [data.input{1},'_',date,'_',clock_var];
+ppid = [cfg.input{1},'_',date,'_',clock_var];
 
 % select sequence to use
-if str2double(data.input{3}) == 1
+if str2double(cfg.input{3}) == 1
     load('sequences\sequence1.mat');
-elseif str2double(data.input{3}) == 2
+elseif str2double(cfg.input{3}) == 2
     load('sequences\sequence2.mat');
-elseif str2double(data.input{3}) == 3
+elseif str2double(cfg.input{3}) == 3
     load('sequences\sequence3.mat');
-elseif str2double(data.input{3}) == 4
+elseif str2double(cfg.input{3}) == 4
     load('sequences\sequence4.mat');
 else
     error('Selected sequence does not exist');
 end
 
 % save information from chosen sequence in the 'data' structure
-data.sequences.trialOrder = trialOrder; 
-data.sequences.jitt_def1 = jitter_def;
-data.sounds.files = sound_name;
+cfg.sequences.trialOrder = trialOrder; 
+cfg.sequences.jitt_def1 = jitter_def;
+cfg.sounds.files = sound_name;
 
 % get subject id folder to store result files
-if ~isdir(['RESULTS_AUT\',data.input{1}])
-    mkdir(['RESULTS_AUT\',data.input{1}]);
+if ~isdir(['RESULTS_AUT\',cfg.input{1}])
+    mkdir(['RESULTS_AUT\',cfg.input{1}]);
 end
 
 % log file creation + open file
-logFile = strcat(['RESULTS_AUT\',data.input{1},'\',ppid,'.results']);
+logFile = strcat(['RESULTS_AUT\',cfg.input{1},'\',ppid,'.results']);
 logfid = fopen(logFile,'a');
 
 % subject identification
 fprintf(logfid,'%s%s\t\t%s%s\t\t%s%s\t\t%s%s',...
-    'ID: ',data.input{1},...
+    'ID: ',cfg.input{1},...
     'Date: ',date,...
     'Time: ', [num2str(clock_var(5)),'h ',num2str(round(clock_var(6))),'m'],...
-    'Sequence: ',data.input{3});
+    'Sequence: ',cfg.input{3});
 % table header
 fprintf(logfid,'\n\n%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s',...
     'Trial #','Trial start (s)','Sound Name','Sound file duration (s)',...
@@ -248,8 +248,8 @@ LPT_interval = 0.01; % edited - 10 ms
 WaitSecs(LPT_interval);
 
 % Initialise Eyelink
-dummymode = str2double(data.input(2)); % set to 1 to initialise in dummymode
-data.leadout_duration = 5;
+dummymode = str2double(cfg.input(2)); % set to 1 to initialise in dummymode
+cfg.leadout_duration = 5;
 
 
 %% INITIALISE WINDOW
@@ -257,15 +257,15 @@ data.leadout_duration = 5;
 % PTB screen & keyboard
 % set 1 in the SkipSyncTests for debugging purposes and 0 for real aquisitions
 Screen('Preference','SkipSyncTests', 1);
-[w,~] = Screen('OpenWindow',screenNumber,data.format.background_color);
+[w,~] = Screen('OpenWindow',screenNumber,cfg.format.background_color);
 HideCursor(w);
 PsychTweak('UseGPUIndex', 1);
-Screen('TextSize',w,data.format.fontSize);
-Screen('TextFont',w,data.format.font);
+Screen('TextSize',w,cfg.format.fontSize);
+Screen('TextFont',w,cfg.format.font);
 Screen('TextStyle', w, 1);
 
 % prepare texture with scale to use
-tex = Screen('MakeTexture',w,data.image.ima);
+tex = Screen('MakeTexture',w,cfg.image.ima);
 
 % get monitor frame rate
 nominalFrameRate = Screen('NominalFrameRate', w);
@@ -286,9 +286,9 @@ end
 fprintf('Running experiment on a ''%s'' tracker.\n',vs);
 
 % open file to record data
-edfF = Eyelink('Openfile',[data.input{1},'.edf']);
+edfF = Eyelink('Openfile',[cfg.input{1},'.edf']);
 if edfF ~= 0
-    fprintf('Cannot create EDF file ''%s''',[data.input{1},'.edf']);
+    fprintf('Cannot create EDF file ''%s''',[cfg.input{1},'.edf']);
     Eyelink('Shutdown');
     Screen('CloseAll');
 end
@@ -302,9 +302,9 @@ Eyelink('command',...
 % SET UP TRACKER CONFIGURATION
 % setting: proper recording resolution, calibration type and data file content
 Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld',...
-    0,0,data.format.resolx-1,data.format.resoly-1);
+    0,0,cfg.format.resolx-1,cfg.format.resoly-1);
 Eyelink('command','DISPLAY_COORDS %ld %ld %ld %ld',...
-    0,0,data.format.resolx-1,data.format.resoly-1);
+    0,0,cfg.format.resolx-1,cfg.format.resoly-1);
 % calibration type - set
 Eyelink('command','calibration_type = HV9');
 
@@ -383,26 +383,26 @@ wait_time = 3; % definition of time to wait after stimulus presentation
 scale_presentation_time = 5; % duration of scale presentation
 
 % variable to create 30s countdown
-data.values.restTrial = sort(repmat(1:30, 1, nominalFrameRate), 'descend');
+cfg.values.restTrial = sort(repmat(1:30, 1, nominalFrameRate), 'descend');
 %
 % allocate variable space
 % allocation of other struct data fields (double/cell)
 % double variables
-data.values.trialStart = zeros(1,size(data.sequences.trialOrder,1));
-data.values.soundStart = zeros(1,size(data.sequences.trialOrder,1));
-data.values.soundEnd = zeros(1,size(data.sequences.trialOrder,1));
-data.values.off = zeros(1,size(data.sequences.trialOrder,1));
-data.values.offoff = zeros(1,size(data.sequences.trialOrder,1));
-data.values.rtime_aut = zeros(1,size(data.sequences.trialOrder,1));
+cfg.values.trialStart = zeros(1,size(cfg.sequences.trialOrder,1));
+cfg.values.soundStart = zeros(1,size(cfg.sequences.trialOrder,1));
+cfg.values.soundEnd = zeros(1,size(cfg.sequences.trialOrder,1));
+cfg.values.off = zeros(1,size(cfg.sequences.trialOrder,1));
+cfg.values.offoff = zeros(1,size(cfg.sequences.trialOrder,1));
+cfg.values.rtime_aut = zeros(1,size(cfg.sequences.trialOrder,1));
 % cell variables
-data.values.response_aut = cell(1,size(data.sequences.trialOrder,1));
+cfg.values.response_aut = cell(1,size(cfg.sequences.trialOrder,1));
 %
 % AUX script to pre-load sounds to be used during the task
 aut_compS_aux_loadSounds
 
 %% STARTUP - INSTRUCTIONS
 % startup screen - press space when ready to read the instructions
-DrawFormattedText(w,data.text.getready,'center','center',0);
+DrawFormattedText(w,cfg.text.getready,'center','center',0);
 
 % EYELINK
 Eyelink('Message','Initial Screen');
@@ -428,7 +428,7 @@ while nextScreen == 1
 end
 
 % instruction screen
-DrawFormattedText(w,data.text.instructions_p1,'center','center',0);
+DrawFormattedText(w,cfg.text.instructions_p1,'center','center',0);
 
 % EYELINK
 Eyelink('Message','Instructions Screen');
@@ -458,16 +458,16 @@ clear nextScreen keyCode % cleanup
 
 % get fontsize = 120 - to present text bigger throughout the task
 % it does not affect the scale since it is presented as an image!
-Screen('TextSize',w,data.format.fontSizeFixation);
+Screen('TextSize',w,cfg.format.fontSizeFixation);
 
 %% TASK
-for i = 1:size(data.sequences.trialOrder,1)
+for i = 1:size(cfg.sequences.trialOrder,1)
 
     if i == 1
         first_trial = GetSecs;
-        data.values.trialStart(i) = GetSecs - first_trial;
+        cfg.values.trialStart(i) = GetSecs - first_trial;
     else
-        data.values.trialStart(i) = GetSecs - first_trial;
+        cfg.values.trialStart(i) = GetSecs - first_trial;
     end
     
     % get fixation cross
@@ -479,14 +479,14 @@ for i = 1:size(data.sequences.trialOrder,1)
     % - send information about which trial we are in and start recording
     Eyelink('Message','TRIALID %d',i);
     Eyelink('command','record_status_message "TRIAL %d/%d"',...
-        i,size(data.sequences.trialOrder,1));
+        i,size(cfg.sequences.trialOrder,1));
     % before recording place reference graphics on the host display must be
     % offline to draw to Eyelink screen
     Eyelink('command','set_idle_mode');
     % clears tracker display and draw cross at center
     Eyelink('command','clear_screen 0');
     Eyelink('command','draw_cross %d %d',...
-        data.format.resolx/2,data.format.resoly/2);
+        cfg.format.resolx/2,cfg.format.resoly/2);
     % EYELINK - end
     
     Screen('Flip',w);
@@ -504,15 +504,15 @@ for i = 1:size(data.sequences.trialOrder,1)
         % EEG
         outp(888,17); % start of 30s rest trial
         
-        for m = 1:length(data.values.restTrial)
+        for m = 1:length(cfg.values.restTrial)
             numStr = ['Relaxe\n',...
-                num2str(data.values.restTrial(m))];
+                num2str(cfg.values.restTrial(m))];
             
             DrawFormattedText(w,numStr,'center','center');
             Screen('Flip', w);
         end
         % restart the task
-        DrawFormattedText(w,'Agora preste atenção.','center','center');
+        DrawFormattedText(w,'Agora preste atenï¿½ï¿½o.','center','center');
         Screen('Flip',w);
         
         % EYELINK - end of rest moment before trial
@@ -535,50 +535,50 @@ for i = 1:size(data.sequences.trialOrder,1)
     outp(888,1); %1 - Start of trial
 
     % definition of jitter (3.5 +/- 0.5 sec)
-    if data.sequences.jitt_def1(i) == 1
+    if cfg.sequences.jitt_def1(i) == 1
         WaitSecs(3);
-    elseif data.sequences.jitt_def1(i) == 2
+    elseif cfg.sequences.jitt_def1(i) == 2
         WaitSecs(3.5);
     else
         WaitSecs(4);
     end
 
-    PsychPortAudio('FillBuffer', phndl, data.sound.y{1,i}'); % load    
+    PsychPortAudio('FillBuffer', phndl, cfg.sound.y{1,i}'); % load    
     
     % EYELINK - write out message to get moment where sound was presented
     % trial type (from 1 to 5) - sound name
     Eyelink('Message','Start of sound presentation, %d - %s',...
-        data.sequences.trialOrder(i),data.sounds.files{i});
+        cfg.sequences.trialOrder(i),cfg.sounds.files{i});
     
-    data.values.soundStart(i) = GetSecs - first_trial;
+    cfg.values.soundStart(i) = GetSecs - first_trial;
     PsychPortAudio('Start', phndl); % play sound
     
     % EEG
     outp(888,marker_start(i)); % - Start of sound - is dependent of sound type!
     
     % sound duration
-    WaitSecs(data.sound.lenghtOrig(i));
+    WaitSecs(cfg.sound.lenghtOrig(i));
     
-    data.values.soundEnd(i) = GetSecs - first_trial;
+    cfg.values.soundEnd(i) = GetSecs - first_trial;
     
     % EYELINK - write out message to get moment where sound ended
     Eye
     link('Message','End of sound presentation, %d - %s',...
-        data.sequences.trialOrder(i),data.sounds.files{i});
+        cfg.sequences.trialOrder(i),cfg.sounds.files{i});
     
     % EEG
     outp(888,marker_end(i)); % - End of sound - is dependent of sound type
     
     WaitSecs(wait_time);
 
-    if data.sequences.trialOrder(i) ~= 5 && data.sequences.trialOrder(i) ~= 6
+    if cfg.sequences.trialOrder(i) ~= 5 && cfg.sequences.trialOrder(i) ~= 6
         
         % present AUTENTICIDADE scale
-        Screen('DrawTexture', w, tex,[],data.image.image_size);
+        Screen('DrawTexture', w, tex,[],cfg.image.image_size);
         Screen('Flip',w);
         
         % moment of scale presentation
-        data.values.off1(i) = ...
+        cfg.values.off1(i) = ...
             GetSecs - first_trial;
         
         % Eyelink - write out message to get moment of scale presentation
@@ -588,11 +588,11 @@ for i = 1:size(data.sequences.trialOrder,1)
         outp(888,2); % 2 - Autenticidade - scale
          
         KbQueueCreate; KbQueueStart;
-        while (GetSecs - first_trial - data.values.off1(i)) ...
+        while (GetSecs - first_trial - cfg.values.off1(i)) ...
                 <= scale_presentation_time
             
             % no subject response
-            data.values.response_aut{i} = 'NaN';
+            cfg.values.response_aut{i} = 'NaN';
             
             [pressed,firstPress,~,~]= KbQueueCheck;
             if pressed
@@ -607,11 +607,11 @@ for i = 1:size(data.sequences.trialOrder,1)
                     if ~exist('BACKUP\','dir')
                         mkdir('BACKUP');
                     end
-                    save(['BACKUP\interrupted_data_',data.input{1},'_',date,'_',clock_var],'data');
+                    save(['BACKUP\interrupted_data_',cfg.input{1},'_',date,'_',clock_var],'data');
                     
                     % check if the edf file exists
-                    if exist([data.input{1},'.edf'],'file') && dummymode == 0
-                        movefile([data.input{1},'.edf'],['RESULTS_AUT\',data.input{1}]);
+                    if exist([cfg.input{1},'.edf'],'file') && dummymode == 0
+                        movefile([cfg.input{1},'.edf'],['RESULTS_AUT\',cfg.input{1}]);
                     end
                     
                     % terminate the task
@@ -624,32 +624,32 @@ for i = 1:size(data.sequences.trialOrder,1)
                         firstPress(keyM)
                     
                     if firstPress(keyZ)
-                        data.values.response_aut{i} = '1';
+                        cfg.values.response_aut{i} = '1';
                     elseif firstPress(keyX)
-                        data.values.response_aut{i} = '2';
+                        cfg.values.response_aut{i} = '2';
                     elseif firstPress(keyC)
-                        data.values.response_aut{i} = '3';
+                        cfg.values.response_aut{i} = '3';
                     elseif firstPress(keyV)
-                        data.values.response_aut{i} = '4';
+                        cfg.values.response_aut{i} = '4';
                     elseif firstPress(keyB)
-                        data.values.response_aut{i} = '5';
+                        cfg.values.response_aut{i} = '5';
                     elseif firstPress(keyN)
-                        data.values.response_aut{i} = '6';
+                        cfg.values.response_aut{i} = '6';
                     else
-                        data.values.response_aut{i} = '7';
+                        cfg.values.response_aut{i} = '7';
                     end
                     
                     % EYELINK - register subject choice
                     Eyelink('Message','Answered - autenticidade');
                     
                     % moment of response
-                    data.values.offoff1(i) = ...
+                    cfg.values.offoff1(i) = ...
                         GetSecs - first_trial; 
-                    data.values.response_aut{i} = ...
-                        data.values.response_aut{i}(1);
+                    cfg.values.response_aut{i} = ...
+                        cfg.values.response_aut{i}(1);
                     % response time
-                    data.values.rtime_aut(i) = ...
-                        data.values.offoff1(i) - data.values.off1(i); 
+                    cfg.values.rtime_aut(i) = ...
+                        cfg.values.offoff1(i) - cfg.values.off1(i); 
                     
                     % EEG
                     outp(888,3); % 3 - Choice
@@ -660,7 +660,7 @@ for i = 1:size(data.sequences.trialOrder,1)
         end
         KbQueueStop; KbQueueRelease; % stop key query
 
-        if i == size(data.sequences.trialOrder,1)
+        if i == size(cfg.sequences.trialOrder,1)
             DrawFormattedText(w,'+','center','center');
             Screen('Flip',w);
         end
@@ -686,23 +686,23 @@ aut_compS_aux_writeLogFile(logfid,i,data,interrupt);
 %% CLOSING EYETRACKER FILE
 
 Eyelink('command', 'set_idle_mode');
-WaitSecs(data.leadout_duration);
+WaitSecs(cfg.leadout_duration);
 Eyelink('CloseFile');
 
 try
     fprintf('Receiving data file ''%s''\n',...
-        [data.input{1},'.edf'] );
+        [cfg.input{1},'.edf'] );
     status=Eyelink('ReceiveFile');
     if status > 0
         fprintf('ReceiveFile status %d\n', status);
     end
     if 2==exist(edfFile, 'file')
         fprintf('Data file ''%s'' can be found in ''%s''\n',...
-            [data.input{1},'.edf'], pwd );
+            [cfg.input{1},'.edf'], pwd );
     end
 catch
     fprintf('Problem receiving data file ''%s''\n',...
-        [data.input{1},'.edf'] );
+        [cfg.input{1},'.edf'] );
 end
 
 % close the eye tracker and window
@@ -712,11 +712,11 @@ Screen('CloseAll');
 
 %% CLOSE FINAL SCREEN
 fprintf('\n\n\nSaving data, do not close matlab.\n');
-save(['backup\data_',data.input{1},'_',date,'_',clock_var],'data');
+save(['backup\data_',cfg.input{1},'_',date,'_',clock_var],'data');
 
 % check if the edf file exists
-if exist([data.input{1},'.edf'],'file') && dummymode == 0
-    movefile([data.input{1},'.edf'],['RESULTS_AUT\',data.input{1}]);
+if exist([cfg.input{1},'.edf'],'file') && dummymode == 0
+    movefile([cfg.input{1},'.edf'],['RESULTS_AUT\',cfg.input{1}]);
 end
 
 % final cleanup

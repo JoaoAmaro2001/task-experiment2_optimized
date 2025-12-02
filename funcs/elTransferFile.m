@@ -1,11 +1,11 @@
-% Function for transferring copy of EDF file to the experiment folder on Display PC.
-% Allows for optional destination path which is different from experiment folder
-function transferFile
+function elTransferFile(el,edfFile,window)
+    % Function for transferring copy of EDF file to the experiment folder on Display PC.
+    % Allows for optional destination path which is different from experiment folder
     try
-        if dummymode == 0 % If connected to EyeLink
+        if el.connected % If connected to EyeLink
             % Show 'Receiving data file...' text until file transfer is complete
             Screen('FillRect', window, el.backgroundcolour); % Prepare background on backbuffer
-            Screen('DrawText', window, 'Receiving data file...', 5, height-35, 0); % Prepare text
+            Screen('DrawText', window, 'Receiving data file...', 5, 1080-35, 0); % Prepare text
             Screen('Flip', window); % Present text
             fprintf('Receiving data file ''%s.edf''\n', edfFile); % Print some text in Matlab's Command Window
             
