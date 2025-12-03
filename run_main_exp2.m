@@ -8,6 +8,9 @@ function run_main_exp2()
 % Clean workspace
 clearvars; close all; clc; 
 
+% Ensure function stops in case of error
+dbstop if error
+
 % Error utility
 % Only works if placed inside a function
 cleanupObj = onCleanup(@() taskCleanup());
@@ -137,6 +140,7 @@ while trial_ <= n
             if cfg.BIDS.run==1
             start_exp = GetSecs();
             NetStation('StartRecording')
+            Eyelink('StartRecording');
             end
             % -------------------------------------------
             if cfg.info.parallel_port; parallel_port(99); end   % Send to NetStation
@@ -185,7 +189,6 @@ while trial_ <= n
             if cfg.info.parallel_port; parallel_port(98); end   % Send to NetStation
             NetStation('Event','EVEN',tFixation, 0.001,'cros',state); NetStation('FlushReadbuffer'); 
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DI98', state, start_exp, 500);
-            % -------------------------------------------
             Eyelink('Message','Eyes Closed');
             Eyelink('command','record_status_message "Eyes Closed"')
             % -------------------------------------------
@@ -214,10 +217,10 @@ while trial_ <= n
             % Draw Cross
             drawCross(cfg.screen.pointer, cfg.screen.resolx, cfg.screen.resoly);
             tFixation = Screen('Flip', cfg.screen.pointer);
+            % -------------------------------------------            
             if cfg.info.parallel_port; parallel_port(97); end   % Send to NetStation
             NetStation('Event','EVEN',tFixation, 0.001,'cros',state); NetStation('FlushReadbuffer'); 
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DI97', state, start_exp, 500);
-            % -------------------------------------------
             Eyelink('Message','Eyes Open');
             Eyelink('command','record_status_message "Eyes Open"')
             % -------------------------------------------
@@ -231,7 +234,8 @@ while trial_ <= n
         case 1
             if cfg.BIDS.run==2
                 start_exp = GetSecs();
-                NetStation('StartRecording')            
+                NetStation('StartRecording')   
+                Eyelink('StartRecording');
             end
             % Screen
             Screen('TextSize', cfg.screen.pointer, 50);
@@ -266,10 +270,6 @@ while trial_ <= n
             % NetStation('Event','EVEN',StimulusOnsetTime, 0.001, 'most',state); NetStation('FlushReadbuffer');              
             Eyelink('Message','EEGSYNCH_%d',state);
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN2', state, start_exp, 500);
-            % -------------------------------------------EL start
-            % Eyelink('SetOfflineMode')
-            % Eyelink('StartRecording');
-            % WaitSecs(0.1);
             % -------------------------------------------
             WaitSecs(1);
             event_ = event_ + 1;
@@ -301,7 +301,7 @@ while trial_ <= n
                 firstFrameDisplayed = false;
                 
                 % The following while loop finishes if a key is touched
-                while ~KbCheck && tex ~= -1 
+                while tex ~= -1 %&& ~KbCheck() 
                     tex = Screen('GetMovieImage', cfg.screen.pointer, movie, 1);
                     if tex > 0
                         Screen('DrawTexture', cfg.screen.pointer, tex, [], cfg.screen.stim);
@@ -537,7 +537,6 @@ while trial_ <= n
             if cfg.info.parallel_port; parallel_port(7); end   % Send to NetStation
             NetStation('Event','EVEN',BlankTime, 0.001, 'blan',5); NetStation('FlushReadbuffer');                                                                                  
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN7', state, start_exp, 500);                            
-
             % -------------------------------------------
             WaitSecs(1);
             % ------------------------------------------- End trial EL

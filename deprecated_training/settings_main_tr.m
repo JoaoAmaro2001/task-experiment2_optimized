@@ -1,13 +1,13 @@
 % Init pc-specific paths and variables
-setpath;
+cfg = setpath();
 
 % Directories
-docs_path     = fullfile(scripts,'docs');
-allstim_path  = fullfile(sourcedata, 'supp', 'allStimuli');
-stim_path     = fullfile(sourcedata, 'supp', 'stimuliTraining');
-logs_path     = fullfile(sourcedata, 'supp', 'logfiles');
-event_path    = fullfile(sourcedata, 'supp', 'events');
-data_path     = fullfile(sourcedata, 'data');
+% docs_path     = fullfile(scripts,'docs');
+allstim_path  = fullfile(cfg.paths.local.sourcedata, 'supp', 'allStimuli');
+stim_path     = fullfile(cfg.paths.local.sourcedata, 'supp', 'stimuliTraining');
+logs_path     = fullfile(cfg.paths.sourcedata, 'supp', 'logfiles');
+event_path    = fullfile(cfg.paths.sourcedata, 'supp', 'events');
+data_path     = fullfile(cfg.paths.sourcedata, 'data');
 
 %  SCREEN SETUP
 output_screen = 2; % 1 for primary, 2 for secondary, ...
@@ -109,8 +109,15 @@ Screen('Preference','VisualDebugLevel', 0); % Minimum amount of diagnostic outpu
 % -------------------------------------------------------------------------
 %                       Initialise Eyelink +  Screen
 % -------------------------------------------------------------------------
-edfFileName = [cfg.input{1} '_' cfg.input{3}]; % cannot have more than 8 chars
-[window_1, rect, el] = eyelinkExperiment2(screenNumber, edfFileName, data);
+% edfFileName = [cfg.input{1} '_' cfg.input{3}]; % cannot have more than 8 chars
+% [window_1, rect, el] = eyelinkExperiment2(screenNumber, edfFileName, data);
+
+% Open experiment graphics on the specified screen
+[window_1, rect] = Screen('Openwindow',cfg.screen.number,cfg.format.backgroundColor,[],[],2);
+Screen('TextSize', cfg.screen.pointer,cfg.format.fontSizeText);
+Screen('TextFont', cfg.screen.pointer,cfg.format.font);
+Screen('TextStyle', cfg.screen.pointer, 1);
+Screen('Flip', cfg.screen.pointer); 
 
 % -------------------------------------------------------------------------
 %                             Get Screen Center

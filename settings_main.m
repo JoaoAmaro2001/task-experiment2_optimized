@@ -15,6 +15,17 @@ else
     Screen('Preference', 'SkipSyncTests', 0);
 end
 
+% Training
+cfg.training = true;
+if cfg.training
+    warning('Running in training mode')
+    a = input('Press k to continue...\n','s');
+    if ~strcmpi(a,'k')
+        clearvars
+        return
+    end
+end
+
 % Paths
 cfg.paths.allstim_path  = fullfile(cfg.paths.local.sourcedata, 'supp', 'allStimuli');
 cfg.paths.stim_path     = fullfile(cfg.paths.local.sourcedata, 'supp', 'stimuli');
@@ -192,13 +203,14 @@ cfg.export.exportTsv  = true;
 NetStation('Connect', cfg.info.network.ipv4.eeg)
 disp('Connection with NetStation successfull!');
 
-% -------------------------------------------------------------------------
-%                             SETUP SCREEN
-% ------------------------------------------------------------------------- 
-
-% clear screen
-Screen('OpenWindow',0,[128 128 128]);
-
+% Using parallel port for EEG markers
+if cfg.info.parallel_port
+    exists_mex = which("io64");
+    if isempty(exists_mex)
+        error("Executable not found in the path. Ensure you downloaded it and added it to path.")
+        cfg.info.parallel_port = false;
+    end
+end
         
 % -------------------------------------------------------------------------
 %                       Initialise Eyelink +  Screen
@@ -212,16 +224,37 @@ end
 % Init eyelink
 edfFileName = [cfg.input{1} '_' cfg.input{3}]; % cannot have more than 8 chars
 [cfg.screen.pointer, cfg.screen.rect, cfg.el] = elInitiate(cfg, edfFileName);    
+
 % % Open experiment graphics on the specified screen
 % [cfg.screen.pointer, rect] = Screen('Openwindow',cfg.screen.number,cfg.format.backgroundColor,[],[],2);
 % Screen('TextSize', cfg.screen.pointer,cfg.format.fontSizeText);
 % Screen('TextFont', cfg.screen.pointer,cfg.format.font);
 % Screen('TextStyle', cfg.screen.pointer, 1);
 % Screen('Flip', cfg.screen.pointer); 
-
-
-% Return width and height of the graphics window/screen in pixels
+% % Return width and height of the graphics window/screen in pixels
 % [width, height] = Screen('WindowSize', cfg.screen.pointer);
+
+% Get existing pointers
+cfg.info.pointer = Screen('GetWindowInfo', cfg.screen.pointer);
+
+% -------------------------------------------------------------------------
+%                             Training mode
+% -------------------------------------------------------------------------
+
+if cfg.training % overwrite previous parameters
+    cfg.paths.stim_path = fullfile(cfg.paths.local.sourcedata, 'supp', 'stimuliTraining');
+    cfg.sequences.files = {dir(fullfile(cfg.paths.stim_path,'*.mp4')).name};
+    cfg.task.stimsPerRun = numel(cfg.sequences.files);
+    cfg.task.eyes_closed_duration = 5; % in secs
+    cfg.task.eyes_open_duration   = 5; % in secs   
+    cfg.export.exportXlsx = false;
+    cfg.export.exportTsv  = false;    
+end
+
+
+% -------------------------------------------------------------------------
+%                             Videos
+% -------------------------------------------------------------------------
 
 % Stimulus
 cfg.stim.isVideo = true;
@@ -230,7 +263,7 @@ if cfg.stim.isVideo
     % another recommendation is to process them all with ffmpeg
     % cache videos to improve performance
     % Videos standardized with ffmpeg
-    % foreach ($f in Get-ChildItem *.mp4) {
+    % foreach ($f in Get-ChildItem *.avi) {
     % ffmpeg -i $f.FullName -an -pix_fmt yuv420p -c:v libx264 -profile:v high -preset fast -crf 17 -r 30 -movflags +faststart ($f.BaseName + ".mp4")
     % }
     disp('Preloading videos...')
@@ -243,24 +276,7 @@ if cfg.stim.isVideo
     cfg.stim.preloaded = true;
 end
 
-% -------------------------------------------------------------------------
-%                             Get Screen Center
-% -------------------------------------------------------------------------
-
-% Get existing pointers
-cfg.info.pointer = Screen('GetWindowInfo', cfg.screen.pointer);
-
-
-% Using parallel port
-if cfg.info.parallel_port
-    exists_mex = which("io64");
-    if isempty(exists_mex)
-        error("Executable not found in the path. Ensure you downloaded it and added it to path.")
-        cfg.info.parallel_port = false;
-    end
-end
-
-% Save cfg to .mat and .json
+% Save cfg to .mat and .json (optional)
 
 end
 
