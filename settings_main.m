@@ -16,7 +16,7 @@ else
 end
 
 % Training
-cfg.training = true;
+cfg.training = false;
 if cfg.training
     warning('Running in training mode')
     a = input('Press k to continue...\n','s');
